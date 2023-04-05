@@ -12,7 +12,7 @@ interface IVerifier {
         bytes[12] addRH;
         uint8[32] pubKeys;
         uint8[32] R8;
-        uint8[111] message;
+        uint8[] message;
     }
     // Ex optionName = "PMul1"
     struct PMul1Proof {

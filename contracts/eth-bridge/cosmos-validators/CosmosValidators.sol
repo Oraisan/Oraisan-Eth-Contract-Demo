@@ -24,6 +24,7 @@ contract CosmosValidators is
     //     uint256 leaf;
     //     uint256[] siblings;
     // }
+    uint256 private numValidator;
     uint256 private currentHeight;
     Validator[] private validatorSet;
 
@@ -37,12 +38,22 @@ contract CosmosValidators is
 
     function initialize(
         address _libAddressManager,
-        uint32 _merkleTreeHeight
+        uint256 _currentHeight, 
+        uint256 _numValidator, 
+        uint32 _merkleTreeHeight,
+        Validator[] memory _validatorSet
     ) public initializer {
         require(
             levels == 0 && address(libAddressManager) == address(0),
             "KYC already initialize"
         );
+
+        require(_numValidator == _validatorSet.length, "invalid numberValidator");
+        currentHeight = _currentHeight;
+        numValidator = _numValidator;
+        for(uint256 i = 0; i < _numValidator; i++) {
+            validatorSet[i] = _validatorSet[i];
+        }
 
         __Lib_AddressResolver_init(_libAddressManager);
         __AVL_Tree_init(_merkleTreeHeight);
@@ -72,7 +83,12 @@ contract CosmosValidators is
     ) external {
         require(msg.sender == resolve("OraisanGate"), "invalid sender");
         currentHeight = _height;
-        validatorSet = _validatorSet;
+        uint256 len = _validatorSet.length;
+        require(len <= numValidator, "invalid validatorSet");
+        for(uint256 i = 0; i < len; i++) {
+            validatorSet[i] = _validatorSet[i];
+        }
+        numValidator = len;
     }
 
     // bridge validator
@@ -83,7 +99,7 @@ contract CosmosValidators is
         Validator[] memory _validatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
         IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
-        uint8[40][111] memory _validatorSignature
+        uint8[3][111] memory _validatorSignature
     ) public returns (bool) {
         // require(
         //     verifyValidatorHash(_validatorHash, _validatorSet),
@@ -113,8 +129,8 @@ contract CosmosValidators is
         }
 
         return
-            bytes32(validators_hash) ==
-            bytes32(calculateRootByLeafs(validatorSetEncode));
+            keccak256(validators_hash) ==
+            keccak256(calculateRootByLeafs(validatorSetEncode));
     }
 
     function encodeValidator(
@@ -127,7 +143,7 @@ contract CosmosValidators is
         Validator[] memory _newValidatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
         IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
-        uint8[40][111] memory _message
+        uint8[3][111] memory _message
     ) public returns (bool) {
         require(
             _AddRHProof.length == _newValidatorSet.length,
@@ -155,15 +171,15 @@ contract CosmosValidators is
             // }
             // check signature in AddRHculateProof with messp[i][111];
             if (
-                verifyAddRHuculateAddRHProof(
-                    _AddRHProof[i].optionName,
-                    _AddRHProof[i].pi_a,
-                    _AddRHProof[i].pi_b,
-                    _AddRHProof[i].pi_c,
-                    _AddRHProof[i].pubKeys,
-                    _AddRHProof[i].R8,
-                    _AddRHProof[i].message
-                ) &&
+                // verifyAddRHuculateAddRHProof(
+                //     _AddRHProof[i].optionName,
+                //     _AddRHProof[i].pi_a,
+                //     _AddRHProof[i].pi_b,
+                //     _AddRHProof[i].pi_c,
+                //     _AddRHProof[i].pubKeys,
+                //     _AddRHProof[i].R8,
+                //     _AddRHProof[i].message 
+                // ) &&
                 verifyCalculatePointMulProof(
                     _verifyPMul1Proof[i].optionName,
                     _verifyPMul1Proof[i].pi_a,
@@ -208,7 +224,7 @@ contract CosmosValidators is
         uint[2] memory c,
         uint8[32] memory pubKey,
         uint8[32] memory R8,
-        uint8[111] memory message
+        uint8[] memory message
     )
         public
         returns (

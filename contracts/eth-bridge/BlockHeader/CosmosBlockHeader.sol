@@ -75,8 +75,8 @@ contract CosmosBlockHeader is
         bytes[] memory _siblings
     ) external {
         require(msg.sender == resolve("OraisanGate"), "invalid sender");
-        require(bytes32(dataHashAtHeight[_height]) == bytes32(""), "datahash is existed");
-        require(bytes32(blockHash) == bytes32(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
+        require(dataHashAtHeight[_height].length == 0, "datahash is existed");
+        require(keccak256(blockHash) == keccak256(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
         dataHash = _dataHash;
     }
 
