@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 interface IVerifier {
     // optionName = ten struc
-    // Ex optionName = "AddCalculateAddRH"
-    struct AddCalculateAddRHProof {
+    // Ex optionName = "AddRHculateAddRH"
+    struct AddRHProof {
         string optionName;
         uint[2] pi_a;
         uint[2][2] pi_b;
@@ -13,8 +13,8 @@ interface IVerifier {
         uint8[32] R8;
         uint8[111] message;
     }
-    // Ex optionName = "PointMul1"
-    struct PointMul1Proof {
+    // Ex optionName = "PMul1"
+    struct PMul1Proof {
         string optionName;
         uint[2] pi_a;
         uint[2][2] pi_b;
@@ -26,7 +26,7 @@ interface IVerifier {
         uint256 fnc;
         uint8[] mess;
     }
-    // Ex optionName = "EncodeMessage"    
+    // Ex optionName = "EncodeMessage"
     struct EncodeMessageProof {
         string optionName;
         uint[2] pi_a;

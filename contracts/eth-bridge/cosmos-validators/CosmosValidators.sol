@@ -81,8 +81,8 @@ contract CosmosValidators is
     function verifyNewHeader(
         bytes memory _validatorHash,
         Validator[] memory _validatorSet,
-        IVerifier.AddCalculateAddRHProof[] memory _addCalculateProof,
-        IVerifier.PointMul1Proof[] memory _verifyPMul1Proof,
+        IVerifier.AddRHProof[] memory _AddRHculateProof,
+        IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
         uint8[40][111] memory _validatorSignature
     ) public returns (bool) {
         // require(
@@ -90,7 +90,12 @@ contract CosmosValidators is
         //     "invalid validator hash"
         // );
         require(
-            verifySignaturesHeader(_validatorSet, _addCalculateProof, _verifyPMul1Proof, _validatorSignature),
+            verifySignaturesHeader(
+                _validatorSet,
+                _AddRHculateProof,
+                _verifyPMul1Proof,
+                _validatorSignature
+            ),
             "invalid validator set"
         );
         return true;
@@ -120,12 +125,12 @@ contract CosmosValidators is
 
     function verifySignaturesHeader(
         Validator[] memory _newValidatorSet,
-        IVerifier.AddCalculateAddRHProof[] memory _addCalculateProof,
-        IVerifier.PointMul1Proof[] memory _verifyPMul1Proof,
+        IVerifier.AddRHProof[] memory _AddRHculateProof,
+        IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
         uint8[40][111] memory _message
     ) public returns (bool) {
         require(
-            _addCalculateProof.length == _newValidatorSet.length,
+            _AddRHculateProof.length == _newValidatorSet.length,
             "proof or validator set size is invalid"
         );
         uint256 len = _newValidatorSet.length;
@@ -140,7 +145,7 @@ contract CosmosValidators is
             totalVP += _newValidatorSet[i].votingPower;
 
             if (
-                keccak256(abi.encodePacked(_addCalculateProof[i].optionName)) ==
+                keccak256(abi.encodePacked(_AddRHculateProof[i].optionName)) ==
                 keccak256(abi.encodePacked(""))
             ) {
                 break;
@@ -148,19 +153,19 @@ contract CosmosValidators is
             // for(j = 0; j < 32; j++) {
             //     input[i+j] = _proofs[i].pubKeys[j];
             // }
-            // check signature in addCalculateProof with messp[i][111];
+            // check signature in AddRHculateProof with messp[i][111];
             if (
-                verifyAddCaluculateAddRHProof(
-                    _addCalculateProof[i].optionName,
-                    _addCalculateProof[i].pi_a,
-                    _addCalculateProof[i].pi_b,
-                    _addCalculateProof[i].pi_c,
-                    _addCalculateProof[i].pubKeys,
-                    _addCalculateProof[i].R8,
-                    _addCalculateProof[i].message
+                verifyAddRHuculateAddRHProof(
+                    _AddRHculateProof[i].optionName,
+                    _AddRHculateProof[i].pi_a,
+                    _AddRHculateProof[i].pi_b,
+                    _AddRHculateProof[i].pi_c,
+                    _AddRHculateProof[i].pubKeys,
+                    _AddRHculateProof[i].R8,
+                    _AddRHculateProof[i].message
                 ) &&
                 verifyCalculatePointMulProof(
-                     _verifyPMul1Proof[i].optionName,
+                    _verifyPMul1Proof[i].optionName,
                     _verifyPMul1Proof[i].pi_a,
                     _verifyPMul1Proof[i].pi_b,
                     _verifyPMul1Proof[i].pi_c,
@@ -168,7 +173,7 @@ contract CosmosValidators is
                 )
             ) {
                 // check Pubkey with pubkey in validator set
-                // validator = address(uint160(_addCalculateProof[i].input[0:32]));
+                // validator = address(uint160(_AddRHculateProof[i].input[0:32]));
                 if (checkOldValidator(validator)) {
                     cnt++;
                 }
@@ -196,7 +201,7 @@ contract CosmosValidators is
         return false;
     }
 
-    function verifyAddCaluculateAddRHProof (
+    function verifyAddRHuculateAddRHProof(
         string memory _optionName,
         uint[2] memory a,
         uint[2][2] memory b,
@@ -204,27 +209,36 @@ contract CosmosValidators is
         uint8[32] memory pubKey,
         uint8[32] memory R8,
         uint8[111] memory message
-        // uint[117] memory input
-    ) public returns(bool) {
+    )
+        public
+        returns (
+            // uint[117] memory input
+            bool
+        )
+    {
         uint[] memory input;
         // input.push();
         // IVerify().verifyProof(a, b, c, input);
         return _verifyProof(_optionName, a, b, c, input);
     }
 
-    function verifyCalculatePointMulProof (
+    function verifyCalculatePointMulProof(
         string memory _optionName,
         uint[2] memory a,
         uint[2][2] memory b,
         uint[2] memory c,
         uint8[32] memory S
-        // uint[117] memory input
-    ) public returns(bool) {
+    )
+        public
+        returns (
+            // uint[117] memory input
+            bool
+        )
+    {
         uint[] memory input;
         // IVerify().verifyProof(a, b, c, input);
-       return  _verifyProof(_optionName, a, b, c, input);
+        return _verifyProof(_optionName, a, b, c, input);
     }
-
 
     function _verifyProof(
         string memory _optionName, //Ex: VERIFIER_AGE

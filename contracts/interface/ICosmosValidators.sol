@@ -2,14 +2,13 @@
 pragma solidity ^0.8.0;
 import "./IVerifier.sol";
 
-interface ICosmosValidators is IVerifier{
-
+interface ICosmosValidators is IVerifier {
     struct Validator {
         address validatorAddress;
         uint256 votingPower;
     }
 
-    function getCurrentBlockHeight() external returns(uint256);
+    function getCurrentBlockHeight() external returns (uint256);
 
     function updateValidatorSet(Validator[] memory _validatorSet) external;
 
@@ -18,8 +17,8 @@ interface ICosmosValidators is IVerifier{
     function verifyNewHeader(
         bytes memory _validatorHash,
         Validator[] memory _validatorSet,
-        IVerifier.AddCalculateAddRHProof[] memory _addCalculateProof,
-        IVerifier.PointMul1Proof[] memory _verifyPMul1Proof,
+        IVerifier.AddRHProof[] memory _AddRHculateProof,
+        IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
         uint8[40][111] memory _validatorSignature
     ) external returns (bool);
 

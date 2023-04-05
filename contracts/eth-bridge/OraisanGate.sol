@@ -19,11 +19,9 @@ contract OraisanGate is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
-
     /*╔══════════════════════════════╗
       ║            EVENTS            ║
       ╚══════════════════════════════╝*/
-
 
     /*╔══════════════════════════════╗
       ║          CONSTRUCTOR         ║
@@ -67,24 +65,21 @@ contract OraisanGate is
         bytes memory _newValidatorHash,
         bytes memory _newDataHash,
         ICosmosValidators.Validator[] memory _validatorSet,
-        IVerifer.AddCalculateAddRHProof[] memory _addCalculate,
-        IVerifier.VerifyPMul1Proof[] memory _verifyPMul1Proof,
+        IVerifier.AddRHProof[] memory _AddRHculate,
+        IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
         IVerifier.EncodeMessageProof memory _encodeMessageProof
     ) external whenNotPaused returns (bool) {
         uint256 lenValidator = _validatorSet.length;
         uint256 lenFnc = _encodeMessageProof.message.length;
         uint256 height = _encodeMessageProof.height;
-        bytes[32] memory blockHash = _encodeMessageProof.blockHash;
+        uint8[32] memory blockHash = _encodeMessageProof.blockHash;
 
-        for(uint256 i = 0; i < lenFnc; i++) {
-            if (_encodeMessageProof.message[i].fnc != 0) {
-                
-            }
+        for (uint256 i = 0; i < lenFnc; i++) {
+            if (_encodeMessageProof.message[i].fnc != 0) {}
         }
     }
 
     /*  ╔══════════════════════════════╗
       ║        USERS FUNCTIONS       ║
       ╚══════════════════════════════╝ */
-
 }
