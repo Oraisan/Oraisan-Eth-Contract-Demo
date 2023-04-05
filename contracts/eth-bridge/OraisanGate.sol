@@ -65,7 +65,7 @@ contract OraisanGate is
         bytes memory _newValidatorHash,
         bytes memory _newDataHash,
         ICosmosValidators.Validator[] memory _validatorSet,
-        IVerifier.AddRHProof[] memory _AddRHculate,
+        IVerifier.AddRHProof[] memory _AddRHProof,
         IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
         IVerifier.EncodeMessageProof memory _encodeMessageProof
     ) external whenNotPaused returns (bool) {

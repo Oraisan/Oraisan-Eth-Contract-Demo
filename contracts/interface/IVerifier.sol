@@ -9,6 +9,7 @@ interface IVerifier {
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
+        bytes[12] addRH;
         uint8[32] pubKeys;
         uint8[32] R8;
         uint8[111] message;
@@ -32,6 +33,7 @@ interface IVerifier {
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
+        uint8[32] fnc;
         uint256 height;
         uint8[32] blockHash;
         Mess[] message;

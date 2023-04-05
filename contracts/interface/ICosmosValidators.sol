@@ -17,7 +17,7 @@ interface ICosmosValidators is IVerifier {
     function verifyNewHeader(
         bytes memory _validatorHash,
         Validator[] memory _validatorSet,
-        IVerifier.AddRHProof[] memory _AddRHculateProof,
+        IVerifier.AddRHProof[] memory _AddRHProof,
         IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
         uint8[40][111] memory _validatorSignature
     ) external returns (bool);
