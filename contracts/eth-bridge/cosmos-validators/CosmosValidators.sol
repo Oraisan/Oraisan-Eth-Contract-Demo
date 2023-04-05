@@ -38,8 +38,8 @@ contract CosmosValidators is
 
     function initialize(
         address _libAddressManager,
-        uint256 _currentHeight, 
-        uint256 _numValidator, 
+        uint256 _currentHeight,
+        uint256 _numValidator,
         uint32 _merkleTreeHeight,
         Validator[] memory _validatorSet
     ) public initializer {
@@ -48,10 +48,13 @@ contract CosmosValidators is
             "KYC already initialize"
         );
 
-        require(_numValidator == _validatorSet.length, "invalid numberValidator");
+        require(
+            _numValidator == _validatorSet.length,
+            "invalid numberValidator"
+        );
         currentHeight = _currentHeight;
         numValidator = _numValidator;
-        for(uint256 i = 0; i < _numValidator; i++) {
+        for (uint256 i = 0; i < _numValidator; i++) {
             validatorSet[i] = _validatorSet[i];
         }
 
@@ -84,8 +87,7 @@ contract CosmosValidators is
         require(msg.sender == resolve("OraisanGate"), "invalid sender");
         currentHeight = _height;
         uint256 len = _validatorSet.length;
-        require(len <= numValidator, "invalid validatorSet");
-        for(uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; i++) {
             validatorSet[i] = _validatorSet[i];
         }
         numValidator = len;
@@ -171,22 +173,8 @@ contract CosmosValidators is
             // }
             // check signature in AddRHculateProof with messp[i][111];
             if (
-                // verifyAddRHuculateAddRHProof(
-                //     _AddRHProof[i].optionName,
-                //     _AddRHProof[i].pi_a,
-                //     _AddRHProof[i].pi_b,
-                //     _AddRHProof[i].pi_c,
-                //     _AddRHProof[i].pubKeys,
-                //     _AddRHProof[i].R8,
-                //     _AddRHProof[i].message 
-                // ) &&
-                verifyCalculatePointMulProof(
-                    _verifyPMul1Proof[i].optionName,
-                    _verifyPMul1Proof[i].pi_a,
-                    _verifyPMul1Proof[i].pi_b,
-                    _verifyPMul1Proof[i].pi_c,
-                    _verifyPMul1Proof[i].S
-                )
+                verifyAddRHuculateAddRHProof(_AddRHProof[i]) &&
+                verifyCalculatePointMulProof(_verifyPMul1Proof[i])
             ) {
                 // check Pubkey with pubkey in validator set
                 // validator = address(uint160(_AddRHProof[i].input[0:32]));
@@ -218,42 +206,53 @@ contract CosmosValidators is
     }
 
     function verifyAddRHuculateAddRHProof(
-        string memory _optionName,
-        uint[2] memory a,
-        uint[2][2] memory b,
-        uint[2] memory c,
-        uint8[32] memory pubKey,
-        uint8[32] memory R8,
-        uint8[] memory message
-    )
-        public
-        returns (
-            // uint[117] memory input
-            bool
-        )
-    {
+        IVerifier.AddRHProof memory _AddRHProof
+    ) public returns (bool) {
+        string memory optionName = _AddRHProof.optionName;
+        uint[2] memory a = _AddRHProof.pi_a;
+        uint[2][2] memory b = _AddRHProof.pi_b;
+        uint[2] memory c = _AddRHProof.pi_c;
+        uint8[12] memory addRH = _AddRHProof.addRH;
+        uint8[32] memory pubKeys = _AddRHProof.pubKeys;
+        uint8[32] memory R8 = _AddRHProof.R8;
+        uint8[] memory message = _AddRHProof.message;
         uint[] memory input;
+        uint256 lenMsg = message.length;
+        uint256 i;
+        for (i = 0; i < 12; i++) {
+            input[i] = addRH[i];
+        }
+
+        for (i = 0; i < 32; i++) {
+            input[i + 12] = pubKeys[i];
+        }
+
+        for (i = 0; i < 32; i++) {
+            input[i + 44] = R8[i];
+        }
+
+        for (i = 0; i < lenMsg; i++) {
+            input[i + 76] = message[i];
+        }
         // input.push();
         // IVerify().verifyProof(a, b, c, input);
-        return _verifyProof(_optionName, a, b, c, input);
+        return _verifyProof(optionName, a, b, c, input);
     }
 
     function verifyCalculatePointMulProof(
-        string memory _optionName,
-        uint[2] memory a,
-        uint[2][2] memory b,
-        uint[2] memory c,
-        uint8[32] memory S
-    )
-        public
-        returns (
-            // uint[117] memory input
-            bool
-        )
-    {
+        IVerifier.PMul1Proof memory _PMul1Proof
+    ) public returns (bool) {
+        string memory optionName = _PMul1Proof.optionName;
+        uint[2] memory a = _PMul1Proof.pi_a;
+        uint[2][2] memory b = _PMul1Proof.pi_b;
+        uint[2] memory c = _PMul1Proof.pi_c;
+        uint8[32] memory S = _PMul1Proof.S;
         uint[] memory input;
+        for (uint256 i = 0; i < 32; i++) {
+            input[i] = S[i];
+        }
         // IVerify().verifyProof(a, b, c, input);
-        return _verifyProof(_optionName, a, b, c, input);
+        return _verifyProof(optionName, a, b, c, input);
     }
 
     function _verifyProof(
