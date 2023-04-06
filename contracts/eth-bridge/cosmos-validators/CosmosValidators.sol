@@ -15,7 +15,7 @@ contract CosmosValidators is
     ReentrancyGuardUpgradeable
 {
     struct Validator {
-        address validatorAddress;
+        bytes validatorAddress;
         uint256 votingPower;
     }
 
@@ -27,6 +27,7 @@ contract CosmosValidators is
     uint256 private currentHeight;
     Validator[] private validatorSet;
     mapping(uint256 => Validator[]) private validatorSetAtHeight;
+
     /*╔══════════════════════════════╗
       ║            EVENTS            ║
       ╚══════════════════════════════╝*/
@@ -48,9 +49,8 @@ contract CosmosValidators is
         );
         currentHeight = _currentHeight;
         numValidator = _numValidator;
-        validatorSet = new Validator[](_numValidator);
         for (uint256 i = 0; i < _numValidator; i++) {
-            validatorSet[i] = _validatorSet[i];
+            validatorSet.push(_validatorSet[i]);
         }
 
         validatorSetAtHeight[_currentHeight] = validatorSet;
@@ -81,12 +81,17 @@ contract CosmosValidators is
         Validator[] memory _validatorSet
     ) external {
         require(msg.sender == resolve("OraisanGate"), "invalid sender");
-        require(validatorSetAtHeight[_height].length == 0, "validator set was updated at height");
+        require(
+            validatorSetAtHeight[_height].length == 0,
+            "validator set was updated at height"
+        );
         currentHeight = _height;
         uint256 len = _validatorSet.length;
-        validatorSet = new Validator[](len);
+        // validatorSet = new Validator[](len);
+        delete validatorSet;
+
         for (uint256 i = 0; i < len; i++) {
-            validatorSet[i] = _validatorSet[i];
+            validatorSet.push(validatorSet[i]);
         }
         validatorSetAtHeight[_height] = validatorSet;
         numValidator = len;
@@ -105,11 +110,7 @@ contract CosmosValidators is
         //     "invalid validator hash"
         // );
         require(
-            verifySignaturesHeader(
-                _validatorSet,
-                _AddRHProof,
-                _PMul1Proof
-            ),
+            verifySignaturesHeader(_validatorSet, _AddRHProof, _PMul1Proof),
             "invalid validator set"
         );
         return true;
@@ -123,10 +124,13 @@ contract CosmosValidators is
         bytes memory validatorEncode;
         for (uint256 i = 0; i < len; i++) {
             validatorEncode = encodeValidator(_validatorSet[i]);
-            validatorLeaf[i] = IAVL_Tree(resolve("IAVL_Tree")).hashLeaf(validatorEncode);
-        }       
+            validatorLeaf[i] = IAVL_Tree(resolve("IAVL_Tree")).hashLeaf(
+                validatorEncode
+            );
+        }
 
-        return IAVL_Tree(resolve("IAVL_Tree")).calculateRootByLeafs(validatorLeaf);
+        return
+            IAVL_Tree(resolve("IAVL_Tree")).calculateRootByLeafs(validatorLeaf);
     }
 
     function encodeValidator(
@@ -137,16 +141,17 @@ contract CosmosValidators is
 
     function encodeValidatorSet(
         Validator[] memory _validatorSet
-    ) public view returns(bytes[] memory) {
+    ) public view returns (bytes[] memory) {
         uint256 len = _validatorSet.length;
-        
+
         bytes[] memory a = new bytes[](len);
 
-        for(uint256 i = 0; i < len; i++) {
+        for (uint256 i = 0; i < len; i++) {
             a[i] = encodeValidator(_validatorSet[i]);
         }
         return a;
     }
+
     function verifySignaturesHeader(
         Validator[] memory _newValidatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
@@ -160,7 +165,7 @@ contract CosmosValidators is
         uint256 cnt = 0;
         uint256 totalVP = 0;
         uint256 totalValidVP = 0;
-        address validator;
+        bytes memory validator;
         // uint[] memory input;
         uint256 i;
         // uint256 j;
@@ -200,10 +205,12 @@ contract CosmosValidators is
         return true;
     }
 
-    function checkOldValidator(address pubkey) public view returns (bool) {
+    function checkOldValidator(bytes memory pubkey) public view returns (bool) {
         uint256 len = validatorSet.length;
         for (uint i = 0; i < len; i++) {
-            if (validatorSet[i].validatorAddress == pubkey) {
+            if (
+                keccak256(validatorSet[i].validatorAddress) == keccak256(pubkey)
+            ) {
                 return true;
             }
         }
@@ -222,7 +229,7 @@ contract CosmosValidators is
         uint8[32] memory R8 = _AddRHProof.R8;
         uint8[] memory message = _AddRHProof.message;
         uint256 lenMsg = message.length;
-        uint256[] memory input = new uint256[](76+lenMsg);
+        uint256[] memory input = new uint256[](76 + lenMsg);
         uint256 i;
         for (i = 0; i < 12; i++) {
             input[i] = addRH[i];
@@ -276,7 +283,7 @@ contract CosmosValidators is
         uint256 cnt;
         uint256[] memory input = new uint[](33 + lenMess * (1 + lenMsg));
 
-        for(i = 0; i < lenMess; i++) {
+        for (i = 0; i < lenMess; i++) {
             input[i] = _encodeMessageProof.mess[i].fnc;
         }
 
@@ -288,8 +295,8 @@ contract CosmosValidators is
         }
 
         cnt += 32;
-        for (i = 0; i <lenMess; i++) {
-            lenMsg  = _encodeMessageProof.mess[i].message.length;
+        for (i = 0; i < lenMess; i++) {
+            lenMsg = _encodeMessageProof.mess[i].message.length;
             for (j = 0; j < lenMsg; i++) {
                 input[j + cnt] = _encodeMessageProof.mess[i].message[j];
             }
