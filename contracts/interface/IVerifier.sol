@@ -14,6 +14,10 @@ interface IVerifier {
         uint8[32] R8;
         uint8[] message;
     }
+    // verify(pi_a, pi_b, pi_c, [addRH..., pubKey..., R8..., message...]);
+    // msg = 111bytes
+    // 111bytes > 110 bytes
+
     // Ex optionName = "PMul1"
     struct PMul1Proof {
         string optionName;
@@ -22,10 +26,10 @@ interface IVerifier {
         uint[2] pi_c;
         uint8[32] S;
     }
-
+    
     struct Mess {
-        uint256 fnc;
-        uint8[] mess;
+        uint8 fnc;
+        uint8[] message;
     }
     // Ex optionName = "EncodeMessage"
     struct EncodeMessageProof {
@@ -33,17 +37,19 @@ interface IVerifier {
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
-        uint8[32] fnc;
+        // uint8[] fnc;
         uint256 height;
         uint8[32] blockHash;
-        Mess[] message;
+        Mess[] mess;
     }
+
+
 
     /// @return r  bool true if proof is valid
     function verifyProof(
         uint[2] memory a,
         uint[2][2] memory b,
         uint[2] memory c,
-        uint[] memory input
+        uint256[] memory input
     ) external view returns (bool r);
 }

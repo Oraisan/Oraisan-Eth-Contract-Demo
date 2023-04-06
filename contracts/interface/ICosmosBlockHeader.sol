@@ -1,4 +1,11 @@
 interface ICosmosBlockHeader {
+    struct Header {
+        uint256 height;
+        bytes blockHash;
+        bytes dataHash;
+        bytes validatorHash;
+    }
+
     struct Proof {
         string _optionName;
         uint[2] pi_a;
@@ -9,14 +16,21 @@ interface ICosmosBlockHeader {
 
     function updateDataHash(
         uint256 _height,
-        bytes memory _dataHash,
-        bytes[] memory _siblings
+        bytes memory _dataHash
     ) external;
     
-    function updateBlockHeader(
+    function updateBlockHash(
         uint256 _height,
         bytes memory _blockHash
     ) external;
+
+    function cdcEncode(
+        bytes memory _str
+    ) external view returns(bytes memory);
+
+    function createLeaf(
+        bytes memory _headerAttribute
+    ) external returns(bytes memory);
 
     function verifyProof(
         string memory _optionName, //Ex: VERIFIER_AGE

@@ -100,8 +100,7 @@ contract CosmosValidators is
         bytes memory _validatorHash,
         Validator[] memory _validatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
-        IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
-        uint8[3][111] memory _validatorSignature
+        IVerifier.PMul1Proof[] memory _PMul1Proof
     ) public returns (bool) {
         // require(
         //     verifyValidatorHash(_validatorHash, _validatorSet),
@@ -111,41 +110,51 @@ contract CosmosValidators is
             verifySignaturesHeader(
                 _validatorSet,
                 _AddRHProof,
-                _verifyPMul1Proof,
-                _validatorSignature
+                _PMul1Proof
             ),
             "invalid validator set"
         );
         return true;
     }
 
-    function verifyValidatorHash(
-        bytes memory validators_hash,
-        Validator[] memory _validatorSet
-    ) public returns (bool) {
-        uint256 len = _validatorSet.length;
-        bytes[] memory validatorSetEncode;
+    // function verifyValidatorHash(
+    //     bytes memory validators_hash,
+    //     Validator[] memory _validatorSet
+    // ) public returns (bool) {
+    //     uint256 len = _validatorSet.length;
+    //     bytes[] memory validatorSetEncode;
 
-        for (uint256 i = 0; i < len; i++) {
-            validatorSetEncode[i] = encodeValidator(_validatorSet[i]);
-        }
+    //     for (uint256 i = 0; i < len; i++) {
+    //         validatorSetEncode[i] = encodeValidator(_validatorSet[i]);
+    //     }
 
-        return
-            keccak256(validators_hash) ==
-            keccak256(calculateRootByLeafs(validatorSetEncode));
-    }
+    //     return
+    //         keccak256(validators_hash) ==
+    //         keccak256(calculateRootByLeafs(validatorSetEncode));
+    // }
 
     function encodeValidator(
         Validator memory _validator
-    ) public returns (bytes memory) {
+    ) public view returns (bytes memory) {
         return bytes("1");
     }
 
+    function encodeValidatorSet(
+        Validator[] memory _validatorSet
+    ) public view returns(bytes[] memory) {
+        uint256 len = _validatorSet.length;
+        
+        bytes[] memory a = new bytes[](len);
+
+        for(uint256 i = 0; i < len; i++) {
+            a[i] = encodeValidator(_validatorSet[i]);
+        }
+        return a;
+    }
     function verifySignaturesHeader(
         Validator[] memory _newValidatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
-        IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
-        uint8[3][111] memory _message
+        IVerifier.PMul1Proof[] memory _PMul1Proof
     ) public returns (bool) {
         require(
             _AddRHProof.length == _newValidatorSet.length,
@@ -173,8 +182,8 @@ contract CosmosValidators is
             // }
             // check signature in AddRHculateProof with messp[i][111];
             if (
-                verifyAddRHuculateAddRHProof(_AddRHProof[i]) &&
-                verifyCalculatePointMulProof(_verifyPMul1Proof[i])
+                verifyAddRHProof(_AddRHProof[i]) &&
+                verifyCalculatePointMulProof(_PMul1Proof[i])
             ) {
                 // check Pubkey with pubkey in validator set
                 // validator = address(uint160(_AddRHProof[i].input[0:32]));
@@ -205,9 +214,9 @@ contract CosmosValidators is
         return false;
     }
 
-    function verifyAddRHuculateAddRHProof(
+    function verifyAddRHProof(
         IVerifier.AddRHProof memory _AddRHProof
-    ) public returns (bool) {
+    ) public view returns (bool) {
         string memory optionName = _AddRHProof.optionName;
         uint[2] memory a = _AddRHProof.pi_a;
         uint[2][2] memory b = _AddRHProof.pi_b;
@@ -216,8 +225,8 @@ contract CosmosValidators is
         uint8[32] memory pubKeys = _AddRHProof.pubKeys;
         uint8[32] memory R8 = _AddRHProof.R8;
         uint8[] memory message = _AddRHProof.message;
-        uint[] memory input;
         uint256 lenMsg = message.length;
+        uint256[] memory input = new uint256[](76+lenMsg);
         uint256 i;
         for (i = 0; i < 12; i++) {
             input[i] = addRH[i];
@@ -241,17 +250,56 @@ contract CosmosValidators is
 
     function verifyCalculatePointMulProof(
         IVerifier.PMul1Proof memory _PMul1Proof
-    ) public returns (bool) {
+    ) public view returns (bool) {
         string memory optionName = _PMul1Proof.optionName;
         uint[2] memory a = _PMul1Proof.pi_a;
         uint[2][2] memory b = _PMul1Proof.pi_b;
         uint[2] memory c = _PMul1Proof.pi_c;
         uint8[32] memory S = _PMul1Proof.S;
-        uint[] memory input;
+        uint256[] memory input = new uint256[](32);
         for (uint256 i = 0; i < 32; i++) {
             input[i] = S[i];
         }
         // IVerify().verifyProof(a, b, c, input);
+        return _verifyProof(optionName, a, b, c, input);
+    }
+
+    function verifyEncodeMessageProof(
+        IVerifier.EncodeMessageProof memory _encodeMessageProof
+    ) public view returns (bool) {
+        string memory optionName = _encodeMessageProof.optionName;
+        uint[2] memory a = _encodeMessageProof.pi_a;
+        uint[2][2] memory b = _encodeMessageProof.pi_b;
+        uint[2] memory c = _encodeMessageProof.pi_c;
+        uint256 height = _encodeMessageProof.height;
+        uint8[32] memory blockHash = _encodeMessageProof.blockHash;
+        uint256 lenMess = _encodeMessageProof.mess.length;
+        uint256 lenMsg;
+        uint256 i;
+        uint256 j;
+        uint256 cnt;
+        uint256[] memory input = new uint[](33 + lenMess * (1 + lenMsg));
+
+        for(i = 0; i < lenMess; i++) {
+            input[i] = _encodeMessageProof.mess[i].fnc;
+        }
+
+        input[i + 1] = height;
+        cnt = lenMess + 1;
+
+        for (i = 0; i < 32; i++) {
+            input[i + cnt] = blockHash[i];
+        }
+
+        cnt += 32;
+        for (i = 0; i <lenMess; i++) {
+            lenMsg  = _encodeMessageProof.mess[i].message.length;
+            for (j = 0; j < lenMsg; i++) {
+                input[j + cnt] = _encodeMessageProof.mess[i].message[j];
+            }
+            cnt += lenMsg;
+        }
+
         return _verifyProof(optionName, a, b, c, input);
     }
 

@@ -5,6 +5,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract AVL_Tree is Initializable {
 
+    struct ProofPath {
+        uint256 _leaf;
+        uint256[] _siblings;
+    }
+
     uint256 public levels;
 
     /*╔══════════════════════════════╗

@@ -10,7 +10,10 @@ interface ICosmosValidators is IVerifier {
 
     function getCurrentBlockHeight() external returns (uint256);
 
-    function updateValidatorSet(Validator[] memory _validatorSet) external;
+    function updateValidatorSet(
+        uint256 _height,
+        Validator[] memory _validatorSet
+    ) external;
 
     function updateValidatorSetByProof() external;
 
@@ -18,8 +21,7 @@ interface ICosmosValidators is IVerifier {
         bytes memory _validatorHash,
         Validator[] memory _validatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
-        IVerifier.PMul1Proof[] memory _verifyPMul1Proof,
-        uint8[3][111] memory _validatorSignature
+        IVerifier.PMul1Proof[] memory _PMul1Proof
     ) external returns (bool);
 
     function verifyValidatorHash(
@@ -28,6 +30,10 @@ interface ICosmosValidators is IVerifier {
     ) external returns (bool);
 
     function checkOldValidator(address pubkey) external view returns (bool);
+
+    function verifyEncodeMessageProof(
+        IVerifier.EncodeMessageProof memory _encodeMessageProof
+    ) external returns (bool);
 
     function verifyProof(
         string memory _optionName, //Ex: VERIFIER_AGE

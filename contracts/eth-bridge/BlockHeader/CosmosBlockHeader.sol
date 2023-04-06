@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "../utils/AVL_Tree.sol";
 import {IVerifier} from "../../interface/IVerifier.sol";
 import {ICosmosValidators} from "../../interface/ICosmosValidators.sol";
+import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 
 import "../../libs/Lib_AddressResolver.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -71,13 +72,13 @@ contract CosmosBlockHeader is
 
     function updateDataHash(
         uint256 _height,
-        bytes memory _dataHash,
-        bytes[] memory _siblings
+        bytes memory _dataHash
     ) external {
         require(msg.sender == resolve("OraisanGate"), "invalid sender");
         require(dataHashAtHeight[_height].length == 0, "datahash is existed");
-        require(keccak256(blockHash) == keccak256(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
+        // require(keccak256(blockHash) == keccak256(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
         dataHash = _dataHash;
+        dataHashAtHeight[_height] = _dataHash;
     }
 
     function updateBlockHash(
@@ -86,9 +87,22 @@ contract CosmosBlockHeader is
     ) external {
         require(msg.sender == resolve("OraisanGate"), "invalid sender");
         require(_height == ICosmosValidators(resolve("CosmosValidator")).getCurrentBlockHeight(), "invalid  height header");
+        require(blockHashAtHeight[_height].length == 0, "blockHash is existed");
         currentHeight = _height;
         blockHash = _blockHash;
         blockHashAtHeight[_height] = blockHash;
+    }
+
+    function cdcEncode(
+        bytes memory _str
+    ) public view returns(bytes memory) {
+        return _str;
+    }
+
+    function createLeaf(
+        bytes memory _headerAttribute
+    ) public returns(bytes memory) {
+        return IAVL_Tree(resolve("AVL_Tree")).hashLeaf(cdcEncode(_headerAttribute));
     }
 
     function verifyProof(
