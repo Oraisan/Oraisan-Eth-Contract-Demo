@@ -9,7 +9,7 @@ interface IVerifier {
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
-        uint8[12] addRH;
+        uint256[12] addRH;
         uint8[32] pubKeys;
         uint8[32] R8;
         uint8[] message;

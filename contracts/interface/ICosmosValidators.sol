@@ -18,16 +18,14 @@ interface ICosmosValidators is IVerifier {
     function updateValidatorSetByProof() external;
 
     function verifyNewHeader(
-        bytes memory _validatorHash,
         Validator[] memory _validatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
         IVerifier.PMul1Proof[] memory _PMul1Proof
     ) external returns (bool);
 
-    function verifyValidatorHash(
-        uint256 validators_hash,
+    function calculateValidatorHash(
         Validator[] memory _validatorSet
-    ) external returns (bool);
+    ) external returns (bytes memory);
 
     function checkOldValidator(address pubkey) external view returns (bool);
 

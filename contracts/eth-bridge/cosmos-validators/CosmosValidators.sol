@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-import "../utils/AVL_Tree.sol";
 import {IVerifier} from "../../interface/IVerifier.sol";
+import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 import "../../libs/Lib_AddressResolver.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
@@ -10,7 +10,6 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 
 contract CosmosValidators is
     Lib_AddressResolver,
-    AVL_Tree,
     OwnableUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
@@ -27,7 +26,7 @@ contract CosmosValidators is
     uint256 private numValidator;
     uint256 private currentHeight;
     Validator[] private validatorSet;
-
+    mapping(uint256 => Validator[]) private validatorSetAtHeight;
     /*╔══════════════════════════════╗
       ║            EVENTS            ║
       ╚══════════════════════════════╝*/
@@ -40,26 +39,23 @@ contract CosmosValidators is
         address _libAddressManager,
         uint256 _currentHeight,
         uint256 _numValidator,
-        uint32 _merkleTreeHeight,
         Validator[] memory _validatorSet
     ) public initializer {
-        require(
-            levels == 0 && address(libAddressManager) == address(0),
-            "KYC already initialize"
-        );
-
+        require(currentHeight == 0, "COsmosValidator is initialize");
         require(
             _numValidator == _validatorSet.length,
             "invalid numberValidator"
         );
         currentHeight = _currentHeight;
         numValidator = _numValidator;
+        validatorSet = new Validator[](_numValidator);
         for (uint256 i = 0; i < _numValidator; i++) {
             validatorSet[i] = _validatorSet[i];
         }
 
+        validatorSetAtHeight[_currentHeight] = validatorSet;
+
         __Lib_AddressResolver_init(_libAddressManager);
-        __AVL_Tree_init(_merkleTreeHeight);
         __Context_init_unchained();
         __Ownable_init_unchained();
         __Pausable_init_unchained();
@@ -85,11 +81,14 @@ contract CosmosValidators is
         Validator[] memory _validatorSet
     ) external {
         require(msg.sender == resolve("OraisanGate"), "invalid sender");
+        require(validatorSetAtHeight[_height].length == 0, "validator set was updated at height");
         currentHeight = _height;
         uint256 len = _validatorSet.length;
+        validatorSet = new Validator[](len);
         for (uint256 i = 0; i < len; i++) {
             validatorSet[i] = _validatorSet[i];
         }
+        validatorSetAtHeight[_height] = validatorSet;
         numValidator = len;
     }
 
@@ -97,7 +96,6 @@ contract CosmosValidators is
     function updateValidatorSetByProof() external {}
 
     function verifyNewHeader(
-        bytes memory _validatorHash,
         Validator[] memory _validatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
         IVerifier.PMul1Proof[] memory _PMul1Proof
@@ -117,21 +115,19 @@ contract CosmosValidators is
         return true;
     }
 
-    // function verifyValidatorHash(
-    //     bytes memory validators_hash,
-    //     Validator[] memory _validatorSet
-    // ) public returns (bool) {
-    //     uint256 len = _validatorSet.length;
-    //     bytes[] memory validatorSetEncode;
+    function calculateValidatorHash(
+        Validator[] memory _validatorSet
+    ) public returns (bytes memory) {
+        uint256 len = _validatorSet.length;
+        bytes[] memory validatorLeaf = new bytes[](len);
+        bytes memory validatorEncode;
+        for (uint256 i = 0; i < len; i++) {
+            validatorEncode = encodeValidator(_validatorSet[i]);
+            validatorLeaf[i] = IAVL_Tree(resolve("IAVL_Tree")).hashLeaf(validatorEncode);
+        }       
 
-    //     for (uint256 i = 0; i < len; i++) {
-    //         validatorSetEncode[i] = encodeValidator(_validatorSet[i]);
-    //     }
-
-    //     return
-    //         keccak256(validators_hash) ==
-    //         keccak256(calculateRootByLeafs(validatorSetEncode));
-    // }
+        return IAVL_Tree(resolve("IAVL_Tree")).calculateRootByLeafs(validatorLeaf);
+    }
 
     function encodeValidator(
         Validator memory _validator
@@ -221,7 +217,7 @@ contract CosmosValidators is
         uint[2] memory a = _AddRHProof.pi_a;
         uint[2][2] memory b = _AddRHProof.pi_b;
         uint[2] memory c = _AddRHProof.pi_c;
-        uint8[12] memory addRH = _AddRHProof.addRH;
+        uint256[12] memory addRH = _AddRHProof.addRH;
         uint8[32] memory pubKeys = _AddRHProof.pubKeys;
         uint8[32] memory R8 = _AddRHProof.R8;
         uint8[] memory message = _AddRHProof.message;

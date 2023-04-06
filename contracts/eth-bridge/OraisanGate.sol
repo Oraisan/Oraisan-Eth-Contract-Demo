@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-import "./utils/AVL_Tree.sol";
 import {IVerifier} from "../interface/IVerifier.sol";
 import {ICosmosValidators} from "../interface/ICosmosValidators.sol";
 import {IProcessString} from "../interface/IProcessString.sol";
@@ -16,7 +15,6 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 
 contract OraisanGate is
     Lib_AddressResolver,
-    AVL_Tree,
     OwnableUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
@@ -28,18 +26,13 @@ contract OraisanGate is
     /*╔══════════════════════════════╗
       ║          CONSTRUCTOR         ║
       ╚══════════════════════════════╝*/
-
+    uint256 status;
     function initialize(
-        address _libAddressManager,
-        uint32 _merkleTreeHeight
+        address _libAddressManager
     ) public initializer {
-        require(
-            levels == 0 && address(libAddressManager) == address(0),
-            "KYC already initialize"
-        );
-
+        require(status == 0, "OraisanGate is deployed");
+        status = 1;
         __Lib_AddressResolver_init(_libAddressManager);
-        __AVL_Tree_init(_merkleTreeHeight);
         __Context_init_unchained();
         __Ownable_init_unchained();
         __Pausable_init_unchained();
@@ -114,24 +107,28 @@ contract OraisanGate is
             );
         }
 
-        // uint256 validatorHash = IAVL_Tree(resolve("IAVL_Tree")).calculateRootByLeafs()
-        // require(
-        //     ICosmosValidators(resolve("CosmosValidator")).verifyNewHeader(
-        //         _newBlockHeader.validatorHash,
-        //         _validatorSet,
-        //         _AddRHProof,
-        //         _PMul1Proof
-        //     ),
-        //     "invalid validator signature"
-        // );
-  
+        require(
+            ICosmosValidators(resolve("CosmosValidator")).verifyNewHeader(
+                _validatorSet,
+                _AddRHProof,
+                _PMul1Proof
+            ),
+            "invalid validator signature"
+        );
+
+        bytes memory blockHash = IProcessString(resolve("Convert")).convertBytesArrayToBytes(
+                    _encodeMessageProof.blockHash
+                );
+        bytes memory validatorHash = ICosmosValidators(resolve("CosmosValidator")).calculateValidatorHash(_validatorSet);
+        bytes memory root = IAVL_Tree(resolve("AVL_Tree")).calulateLRootBySiblings(validatorHash, _siblings);
+        require(keccak256(root) == keccak256(blockHash),"invalid blockHash");
+        uint256 height = _encodeMessageProof.height;
+        ICosmosValidators(resolve("CosmosValidator")).updateValidatorSet(height, _validatorSet);
+        ICosmosBlockHeader(resolve("CosmosBlockheader")).updateBlockHash(height, blockHash);
+        
         // bytes memory L = ICosmosBlockHeader(resolve("CosmosBlockHeader")).createLeaf(_newBlockHeader.dataHash);
         // bytes memory R = ICosmosBlockHeader(resolve("CosmosBlockHeader")).createLeaf(_newBlockHeader.validatorHash);
         // bytes memory parrent = IAVL_Tree(resolve("AVL_Tree")).hashInside(L, R);
-        // bytes memory root = IAVL_Tree(resolve("AVL_Tree")).calulateLRootBySiblings(parrent, _siblings);
-        // require(keccak256(root) == keccak256(_newBlockHeader.blockHash),"invalid blockHash");
-        // ICosmosValidators(resolve("CosmosValidator")).updateValidatorSet(_newBlockHeader.height, _validatorSet);
-        // ICosmosBlockHeader(resolve("CosmosBlockheader")).updateBlockHash(_newBlockHeader.height, _newBlockHeader.blockHash);
         // ICosmosBlockHeader(resolve("CosmosBlockheader")).updateDataHash(_newBlockHeader.height, _newBlockHeader.dataHash);
     }
 
