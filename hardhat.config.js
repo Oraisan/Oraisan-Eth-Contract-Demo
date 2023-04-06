@@ -22,9 +22,22 @@ const GOERLI_URL =
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
-  solidity: "0.8.4",
-  defaultNetwork: "bscTestnet",
+  solidity: {
+    version: "0.8.4",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 1000,
+        details: { yul: false },
+      }
+    }
+  },
+  allowUnlimitedContractSize: true,
+  defaultNetwork: "hardhat",
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+    },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       chainId: 97,
