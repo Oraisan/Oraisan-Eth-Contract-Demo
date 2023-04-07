@@ -55,19 +55,16 @@ contract OraisanGate is
         ╚══════════════════════════════╝       */
 
     function updateblockHeader(
-        // ICosmosBlockHeader.Header memory _newBlockHeader,
+        ICosmosBlockHeader.Header memory _newBlockHeader,
         bytes[] memory _siblings,
         ICosmosValidators.Validator[] memory _validatorSet,
-        IVerifier.AddRHProof[] memory _AddRHProof,
-        IVerifier.PMul1Proof[] memory _PMul1Proof,
-        IVerifier.EncodeMessageProof memory _encodeMessageProof
+        IVerifier.SignatureValidatorProof[] memory _SignatureValidatorProof
     ) external whenNotPaused {
         uint256 lenValidator = _validatorSet.length;
-        uint256 lenSig = _AddRHProof.length;
+        uint256 lenSig = _SignatureProof.length;
         uint256 lenFnc = _encodeMessageProof.mess.length;
         uint256 i;
-
-        require(_AddRHProof.length == _PMul1Proof.length, "invalid proof");
+        require(_SignatureProof.length == _PMul1Proof.length, "invalid proof");
         require(
             lenSig <= lenValidator,
             "invalid validatorSet or validator sigs"
@@ -101,7 +98,7 @@ contract OraisanGate is
             require(
                 IProcessString(resolve("convert")).compareBytesArray(
                     _encodeMessageProof.mess[i].message,
-                    _AddRHProof[i].message
+                    _SignatureProof[i].message
                 ),
                 "invalid signature message"
             );
@@ -110,7 +107,7 @@ contract OraisanGate is
         require(
             ICosmosValidators(resolve("CosmosValidator")).verifyNewHeader(
                 _validatorSet,
-                _AddRHProof,
+                _SignatureProof,
                 _PMul1Proof
             ),
             "invalid validator signature"
@@ -125,7 +122,7 @@ contract OraisanGate is
         uint256 height = _encodeMessageProof.height;
         ICosmosValidators(resolve("CosmosValidator")).updateValidatorSet(height, _validatorSet);
         ICosmosBlockHeader(resolve("CosmosBlockheader")).updateBlockHash(height, blockHash);
-        
+
         // bytes memory L = ICosmosBlockHeader(resolve("CosmosBlockHeader")).createLeaf(_newBlockHeader.dataHash);
         // bytes memory R = ICosmosBlockHeader(resolve("CosmosBlockHeader")).createLeaf(_newBlockHeader.validatorHash);
         // bytes memory parrent = IAVL_Tree(resolve("AVL_Tree")).hashInside(L, R);

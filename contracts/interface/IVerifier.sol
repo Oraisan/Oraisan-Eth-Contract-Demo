@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 interface IVerifier {
-    // optionName = ten struc
-    // Ex optionName = "AddRHculateAddRH"
-    struct AddRHProof {
+    // optionName = ten struct
+    // Ex optionName = "AddRH"
+    struct SignatureProof {
         string optionName;
         uint[2] pi_a;
         uint[2][2] pi_b;
@@ -14,23 +14,7 @@ interface IVerifier {
         uint8[32] R8;
         uint8[] message;
     }
-    // verify(pi_a, pi_b, pi_c, [addRH..., pubKey..., R8..., message...]);
-    // msg = 111bytes
-    // 111bytes > 110 bytes
 
-    // Ex optionName = "PMul1"
-    struct PMul1Proof {
-        string optionName;
-        uint[2] pi_a;
-        uint[2][2] pi_b;
-        uint[2] pi_c;
-        uint8[32] S;
-    }
-    
-    struct Mess {
-        uint8 fnc;
-        uint8[] message;
-    }
     // Ex optionName = "EncodeMessage"
     struct EncodeMessageProof {
         string optionName;
