@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-import "../utils/AVL_Tree.sol";
 import {IVerifier} from "../../interface/IVerifier.sol";
+import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 import {ICosmosValidators} from "../../interface/ICosmosValidators.sol";
 import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 
@@ -13,7 +13,6 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 
 contract CosmosBlockHeader is
     Lib_AddressResolver,
-    AVL_Tree,
     OwnableUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
@@ -39,16 +38,22 @@ contract CosmosBlockHeader is
       ╚══════════════════════════════╝*/
 
     function initialize(
-        address _libAddressManager,
-        uint32 _merkleTreeHeight
+        uint256 _height,
+        bytes memory _blockHash,
+        bytes memory _dataHash,
+        bytes memory _validatorHash,
+        address _libAddressManager
     ) public initializer {
-        require(
-            levels == 0 && address(libAddressManager) == address(0),
-            "KYC already initialize"
-        );
+        require(_height == 0, "CosmosBlockHeader is initialized");
+        currentHeight = _height;
+        blockHash = _blockHash;
+        dataHash = _dataHash;
+        validatorHash = _validatorHash;
 
+        dataHashAtHeight[_height] = _dataHash;
+        blockHashAtHeight[_height] = _blockHash;
+        
         __Lib_AddressResolver_init(_libAddressManager);
-        __AVL_Tree_init(_merkleTreeHeight);
         __Context_init_unchained();
         __Ownable_init_unchained();
         __Pausable_init_unchained();

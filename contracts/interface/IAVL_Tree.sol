@@ -3,15 +3,27 @@ pragma solidity ^0.8.0;
 
 interface IAVL_Tree {
     struct ProofPath {
-        uint256 _leaf;
-        uint256[] _siblings;
+        uint256 index;
+        uint256 total;
+        uint256 leaf;
+        bytes[] siblings;
     }
 
-    function hashLeaf(bytes memory _leaf) external returns(bytes memory);
+    function hashLeaf(bytes memory _leaf) external pure returns (bytes memory);
 
-    function hashInside(bytes memory _leafLeft, bytes memory _leafRight) external returns(bytes memory);
+    function hashInside(
+        bytes memory _leafLeft,
+        bytes memory _leafRight
+    ) external pure returns (bytes memory);
 
-    function calculateRootByLeafs(bytes[] memory _leafs) external returns(bytes memory);
+    function calculateRootByLeafs(
+        bytes[] memory _leafs
+    ) external returns (bytes memory);
 
-    function calulateLRootBySiblings(bytes memory _leaf, bytes[] memory _siblings) external returns(bytes memory);
+    function calulateRootBySiblings(
+        uint256 _index,
+        uint256 _total,
+        bytes memory _leaf,
+        bytes[] memory _siblings
+    ) external returns (bytes memory);
 }

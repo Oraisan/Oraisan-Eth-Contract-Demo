@@ -4,30 +4,17 @@ pragma solidity ^0.8.0;
 interface IVerifier {
     // optionName = ten struct
     // Ex optionName = "AddRH"
-    struct SignatureProof {
+    struct SignatureValidatorProof {
         string optionName;
+        uint8 oldIndex;
+        uint8 newIndex;
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
-        uint256[12] addRH;
         uint8[32] pubKeys;
         uint8[32] R8;
-        uint8[] message;
+        uint8[32] S;
     }
-
-    // Ex optionName = "EncodeMessage"
-    struct EncodeMessageProof {
-        string optionName;
-        uint[2] pi_a;
-        uint[2][2] pi_b;
-        uint[2] pi_c;
-        // uint8[] fnc;
-        uint256 height;
-        uint8[32] blockHash;
-        Mess[] mess;
-    }
-
-
 
     /// @return r  bool true if proof is valid
     function verifyProof(
