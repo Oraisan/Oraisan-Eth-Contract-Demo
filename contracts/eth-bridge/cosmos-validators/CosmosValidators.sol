@@ -156,7 +156,7 @@ contract CosmosValidators is
         Validator[] memory _newValidatorSet,
         IVerifier.AddRHProof[] memory _AddRHProof,
         IVerifier.PMul1Proof[] memory _PMul1Proof
-    ) public returns (bool) {
+    ) public view returns (bool) {
         require(
             _AddRHProof.length == _newValidatorSet.length,
             "proof or validator set size is invalid"
@@ -165,7 +165,6 @@ contract CosmosValidators is
         uint256 cnt = 0;
         uint256 totalVP = 0;
         uint256 totalValidVP = 0;
-        bytes memory validator;
         // uint[] memory input;
         uint256 i;
         // uint256 j;
@@ -188,7 +187,7 @@ contract CosmosValidators is
             ) {
                 // check Pubkey with pubkey in validator set
                 // validator = address(uint160(_AddRHProof[i].input[0:32]));
-                if (checkOldValidator(validator)) {
+                if (checkOldValidator(_newValidatorSet[i].validatorAddress)) {
                     cnt++;
                 }
                 totalValidVP += _newValidatorSet[i].votingPower;

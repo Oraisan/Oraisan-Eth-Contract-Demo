@@ -23,7 +23,9 @@ const main = async () => {
     const cosmosValidators = await upgrades.deployProxy(CosmosValidators, [addressManager.address, 1, 3, _validatorSet])
     // console.log(await cosmosValidators.verifyAddRHProof(_AddRHProof));
     // console.log(await cosmosValidators.verifyCalculatePointMulProof(_PMul1Proof));
-    console.log(await cosmosValidators.verifySignaturesHeader(_validatorSet, [_AddRHProof, _AddRHProof, _AddRHProof], [_PMul1Proof, _PMul1Proof, _PMul1Proof]))
+    const tx = await cosmosValidators.verifySignaturesHeader(_validatorSet, [_AddRHProof, _AddRHProof, _AddRHProof], [_PMul1Proof, _PMul1Proof, _PMul1Proof]);
+    // console.log(await tx.wait())
+    console.log(tx)
 }
 
 const _validatorSet = [["0xFD284E309E23A18641A8F545B43D3EB24539F65061F38B80C8B92678BE83A70A", 200159], ["0xFD284E309E23A18641A8F545B43D3EB24539F65061F38B80C8B92678BE83A70A", 200159], ["0xFD284E309E23A18641A8F545B43D3EB24539F65061F38B80C8B92678BE83A70A", 200159]]
