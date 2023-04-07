@@ -1,8 +1,8 @@
 const fs = require("fs");
-const { getProofAddRH } = require("../scripts/utils/getProof");
+const { getProofValidatorSignature } = require("../scripts/utils/getProof");
 const main = async () => {
-    const path = "test/example_inputs/addRH/";
-    const inputProof = await getProofAddRH(path + "public.json", path + "proof.json");
+    const path = "test/example_inputs/validatorSignature/";
+    const inputProof = await getProofValidatorSignature(path + "public.json", path + "proof.json");
 
     const json = JSON.stringify(inputProof, null, 2);
 

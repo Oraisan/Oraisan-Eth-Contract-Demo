@@ -2,10 +2,10 @@ const { ethers, upgrades } = require("hardhat");
 require("dotenv").config();
 
 const main = async () => {
-    const Verifier = await ethers.getContractFactory("VerifierAddRH");
+    const Verifier = await ethers.getContractFactory("VerifierValidatorSignature");
     const verifier = await upgrades.deployProxy(Verifier, []);
     await verifier.deployed();
-    console.log("VerifierAddRH dedployed at: ", verifier.address);
+    console.log("VerifierValidatorSignature dedployed at: ", verifier.address);
 }
 
 main()
