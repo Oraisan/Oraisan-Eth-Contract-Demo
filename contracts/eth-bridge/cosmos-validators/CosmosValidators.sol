@@ -17,7 +17,7 @@ contract CosmosValidators is
     ReentrancyGuardUpgradeable
 {
     struct Validator {
-        bytes validatorAddress;
+        bytes validatorPubKey;
         uint256 votingPower;
     }
 
@@ -197,7 +197,7 @@ contract CosmosValidators is
 
             if (
                 keccak256(validatorPubkeys) !=
-                keccak256(_newValidatorSet[newIndex].validatorAddress)
+                keccak256(_newValidatorSet[newIndex].validatorPubKey)
             ) {
                 continue;
             }
@@ -214,7 +214,7 @@ contract CosmosValidators is
                 if (_signatureValidatorProof[i].oldIndex != 0) {
                     if (
                         keccak256(validatorPubkeys) !=
-                        keccak256(validatorSet[oldIndex].validatorAddress)
+                        keccak256(validatorSet[oldIndex].validatorPubKey)
                     ) {
                         continue;
                     }

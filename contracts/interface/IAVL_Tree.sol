@@ -5,7 +5,7 @@ interface IAVL_Tree {
     struct ProofPath {
         uint256 index;
         uint256 total;
-        uint256 leaf;
+        bytes leaf;
         bytes[] siblings;
     }
 

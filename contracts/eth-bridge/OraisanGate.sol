@@ -21,7 +21,11 @@ contract OraisanGate is
     /*╔══════════════════════════════╗
       ║            EVENTS            ║
       ╚══════════════════════════════╝*/
-
+    event BlockHeaderUpdated(
+        uint256 blockHeight,
+        bytes blockHash,
+        address updater
+    );
     /*╔══════════════════════════════╗
       ║          CONSTRUCTOR         ║
       ╚══════════════════════════════╝*/
@@ -98,8 +102,69 @@ contract OraisanGate is
             _newBlockHeader.height,
             _newBlockHeader.dataHash
         );
+
+        emit BlockHeaderUpdated(
+            _newBlockHeader.height,
+            _newBlockHeader.blockHash,
+            msg.sender
+        );
     }
 
+    function updateblockHeaderV2(
+        ICosmosBlockHeader.Header memory _newBlockHeader,
+        IVerifier.DataAndValsHashProof memory _dataAndValsHashProof,
+        ICosmosValidators.Validator[] memory _validatorSet,
+        IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
+    ) external whenNotPaused {
+        require(
+            ICosmosValidators(resolve("CosmosValidator")).verifyNewHeader(
+                _newBlockHeader,
+                _validatorSet,
+                _signatureValidatorProof
+            ),
+            "invalid validator signature"
+        );
+
+        uint256 height = _newBlockHeader.height;
+
+        uint8[32] memory blockHash = IProcessString(resolve("ProcessString"))
+            .convertBytesToUint8Array32(_newBlockHeader.blockHash);
+        uint8[32] memory dataHash = IProcessString(resolve("ProcessString"))
+            .convertBytesToUint8Array32(_newBlockHeader.dataHash);
+        uint8[32] memory validatorsHash = IProcessString(
+            resolve("ProcessString")
+        ).convertBytesToUint8Array32(_newBlockHeader.validatorHash);
+
+        require(
+            ICosmosBlockHeader(resolve("CosmosBlockHeader"))
+                .verifyDataAndValsHash(
+                    _dataAndValsHashProof,
+                    dataHash,
+                    validatorsHash,
+                    blockHash
+                ),
+            "invalid blockHash"
+        );
+
+        ICosmosValidators(resolve("CosmosValidator")).updateValidatorSet(
+            height,
+            _validatorSet
+        );
+        ICosmosBlockHeader(resolve("CosmosBlockHeader")).updateBlockHash(
+            height,
+            _newBlockHeader.blockHash
+        );
+        ICosmosBlockHeader(resolve("CosmosBlockHeader")).updateDataHash(
+            _newBlockHeader.height,
+            _newBlockHeader.dataHash
+        );
+
+        emit BlockHeaderUpdated(
+            _newBlockHeader.height,
+            _newBlockHeader.blockHash,
+            msg.sender
+        );
+    }
     /*  ╔══════════════════════════════╗
       ║        USERS FUNCTIONS       ║
       ╚══════════════════════════════╝ */

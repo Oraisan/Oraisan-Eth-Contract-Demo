@@ -5,7 +5,7 @@ import {ICosmosBlockHeader} from "./ICosmosBlockHeader.sol";
 
 interface ICosmosValidators {
     struct Validator {
-        address validatorAddress;
+        bytes validatorPubKey;
         uint256 votingPower;
     }
 

@@ -2,8 +2,14 @@
 pragma solidity ^0.8.0;
 
 interface IVerifier {
+    struct DataAndValsHashProof {
+        string optionName;
+        uint[2] pi_a;
+        uint[2][2] pi_b;
+        uint[2] pi_c;
+    }
     // optionName = ten struct
-    // Ex optionName = "AddRH"
+    // Ex optionName = "CosmosValidatorSignature"
     struct SignatureValidatorProof {
         string optionName;
         uint8 oldIndex;

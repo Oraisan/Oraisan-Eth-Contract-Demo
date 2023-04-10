@@ -100,14 +100,34 @@ contract CosmosBlockHeader is
 
     function cdcEncode(
         bytes memory _str
-    ) public view returns(bytes memory) {
+    ) public pure returns(bytes memory) {
         return _str;
     }
 
     function createLeaf(
         bytes memory _headerAttribute
-    ) public returns(bytes memory) {
+    ) public view returns(bytes memory) {
         return IAVL_Tree(resolve("AVL_Tree")).hashLeaf(cdcEncode(_headerAttribute));
+    }
+
+    function verifyDataAndValsHash(
+        IVerifier.DataAndValsHashProof memory _dataAndValsHashProof,
+        uint8[32] memory _dataHash,
+        uint8[32] memory _validatorHash,
+        uint8[32] memory _blockHash
+    ) public view returns(bool) {
+        string memory optionName = _dataAndValsHashProof.optionName;
+
+        uint[2] memory a = _dataAndValsHashProof.pi_a;
+        uint[2][2] memory b = _dataAndValsHashProof.pi_b;
+        uint[2] memory c = _dataAndValsHashProof.pi_c;
+        uint256[] memory input = new uint256[](96);
+        for (uint256 i = 0; i < 32; i++) {
+            input[i] = _dataHash[i];
+            input[i + 32] = _validatorHash[i];
+            input[i + 64] = _blockHash[i];
+        }
+        return _verifyProof(optionName, a, b, c, input);
     }
 
     function verifyProof(
