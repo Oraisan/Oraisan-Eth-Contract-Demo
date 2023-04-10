@@ -10,4 +10,8 @@ interface IProcessString {
         uint8[] memory _a,
         uint8[] memory _b
     ) external returns (bool);
+
+    function sovInt(uint256 a) external pure returns (uint256);
+
+    function encodeSovInt(uint256 a) external pure returns (bytes memory);
 }

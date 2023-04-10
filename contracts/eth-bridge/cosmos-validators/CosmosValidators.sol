@@ -124,6 +124,10 @@ contract CosmosValidators is
         return true;
     }
 
+    /*  ╔══════════════════════════════╗
+        ║        VALIDATORS HASH       ║
+        ╚══════════════════════════════╝       */
+
     function verifyValidatorHash(
         bytes memory _validatorHash,
         Validator[] memory _validatorSet
@@ -146,7 +150,14 @@ contract CosmosValidators is
     function encodeValidator(
         Validator memory _validator
     ) public view returns (bytes memory) {
-        return bytes("1");
+        bytes1 prefixVP = 0x16;
+        bytes1 prefixPubkey = 0x10;
+        bytes1 prefixValidator = 0x10;
+        bytes1 lenPubkey = 0x20;
+        bytes1 lenEncodePubkey = 0x22;
+        bytes memory encodeVP = IProcessString(resolve("ProcessString")).encodeSovInt(_validator.votingPower); 
+
+        return abi.encodePacked(prefixValidator, lenEncodePubkey, prefixPubkey, lenPubkey, _validator.validatorPubKey, prefixVP, encodeVP);
     }
 
     function encodeValidatorSet(
@@ -161,6 +172,10 @@ contract CosmosValidators is
         }
         return a;
     }
+
+    /*  ╔══════════════════════════════╗
+        ║     SIGNATURES FUNCTIONS     ║
+        ╚══════════════════════════════╝       */
 
     function verifySignaturesHeader(
         uint256 _height,
@@ -292,6 +307,10 @@ contract CosmosValidators is
                 input
             );
     }
+
+    /*  ╔══════════════════════════════╗
+        ║         GET FUNCTIONS        ║
+        ╚══════════════════════════════╝       */
 
     function getCurrentBlockHeight() public view returns (uint256) {
         return currentHeight;
