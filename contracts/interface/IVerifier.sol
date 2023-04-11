@@ -9,7 +9,7 @@ interface IVerifier {
         uint[2] pi_c;
     }
     // optionName = ten struct
-    // Ex optionName = "CosmosValidatorSignature"
+    // Ex optionName = "CosmosValidatorsignature"
     struct SignatureValidatorProof {
         string optionName;
         uint8 oldIndex;

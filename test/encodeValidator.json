@@ -1,0 +1,7 @@
+{
+    "validator": {
+        "validatorPubKey": "0xFD284E309E23A18641A8F545B43D3EB24539F65061F38B80C8B92678BE83A70A",
+        "votingPower": 200159
+    },
+    "returns": "0a220a20fd284e309e23a18641a8f545b43d3eb24539f65061f38b80c8b92678be83a70a10df9b0c"
+}

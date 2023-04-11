@@ -63,7 +63,7 @@ contract OraisanGate is
         IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
     ) external whenNotPaused {
         require(
-            ICosmosValidators(resolve("CosmosValidator")).verifyNewHeader(
+            ICosmosValidators(resolve("COSMOS_VALIDATORS")).verifyNewHeader(
                 _newBlockHeader,
                 _validatorSet,
                 _signatureValidatorProof
@@ -73,12 +73,12 @@ contract OraisanGate is
 
         uint256 height = _newBlockHeader.height;
 
-        bytes memory L = ICosmosBlockHeader(resolve("CosmosBlockHeader"))
+        bytes memory L = ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
             .createLeaf(_newBlockHeader.dataHash);
-        bytes memory R = ICosmosBlockHeader(resolve("CosmosBlockHeader"))
+        bytes memory R = ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
             .createLeaf(_newBlockHeader.validatorHash);
-        bytes memory parrent = IAVL_Tree(resolve("AVL_Tree")).hashInside(L, R);
-        bytes memory root = IAVL_Tree(resolve("AVL_Tree"))
+        bytes memory parrent = IAVL_Tree(resolve("AVL_TREE")).hashInside(L, R);
+        bytes memory root = IAVL_Tree(resolve("AVL_TREE"))
             .calulateRootBySiblings(
                 _proofBlockHashPath.index,
                 _proofBlockHashPath.total,
@@ -90,15 +90,15 @@ contract OraisanGate is
             "invalid blockHash"
         );
 
-        ICosmosValidators(resolve("CosmosValidator")).updateValidatorSet(
+        ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSet(
             height,
             _validatorSet
         );
-        ICosmosBlockHeader(resolve("CosmosBlockheader")).updateBlockHash(
+        ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateBlockHash(
             height,
             _newBlockHeader.blockHash
         );
-        ICosmosBlockHeader(resolve("CosmosBlockheader")).updateDataHash(
+        ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateDataHash(
             _newBlockHeader.height,
             _newBlockHeader.dataHash
         );
@@ -117,7 +117,7 @@ contract OraisanGate is
         IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
     ) external whenNotPaused {
         require(
-            ICosmosValidators(resolve("CosmosValidator")).verifyNewHeader(
+            ICosmosValidators(resolve("COSMOS_VALIDATORS")).verifyNewHeader(
                 _newBlockHeader,
                 _validatorSet,
                 _signatureValidatorProof
@@ -127,16 +127,16 @@ contract OraisanGate is
 
         uint256 height = _newBlockHeader.height;
 
-        uint8[32] memory blockHash = IProcessString(resolve("ProcessString"))
+        uint8[32] memory blockHash = IProcessString(resolve("PROCESS_STRING"))
             .convertBytesToUint8Array32(_newBlockHeader.blockHash);
-        uint8[32] memory dataHash = IProcessString(resolve("ProcessString"))
+        uint8[32] memory dataHash = IProcessString(resolve("PROCESS_STRING"))
             .convertBytesToUint8Array32(_newBlockHeader.dataHash);
         uint8[32] memory validatorsHash = IProcessString(
-            resolve("ProcessString")
+            resolve("PROCESS_STRING")
         ).convertBytesToUint8Array32(_newBlockHeader.validatorHash);
 
         require(
-            ICosmosBlockHeader(resolve("CosmosBlockHeader"))
+            ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
                 .verifyDataAndValsHash(
                     _dataAndValsHashProof,
                     dataHash,
@@ -146,15 +146,15 @@ contract OraisanGate is
             "invalid blockHash"
         );
 
-        ICosmosValidators(resolve("CosmosValidator")).updateValidatorSet(
+        ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSet(
             height,
             _validatorSet
         );
-        ICosmosBlockHeader(resolve("CosmosBlockHeader")).updateBlockHash(
+        ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateBlockHash(
             height,
             _newBlockHeader.blockHash
         );
-        ICosmosBlockHeader(resolve("CosmosBlockHeader")).updateDataHash(
+        ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateDataHash(
             _newBlockHeader.height,
             _newBlockHeader.dataHash
         );

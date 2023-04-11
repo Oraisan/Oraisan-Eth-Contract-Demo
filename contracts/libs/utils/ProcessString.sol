@@ -4,6 +4,12 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract ProcessString is Initializable {
+    bool isDeployed;
+    function initialize() public initializer {
+        require(!isDeployed, "ProcessString is deployed");
+        isDeployed = true;
+    }
+    
     function convertUint8Array32ToBytes(
         uint8[32] memory _uint8Array
     ) public pure returns (bytes memory) {

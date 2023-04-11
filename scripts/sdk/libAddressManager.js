@@ -1,4 +1,4 @@
-exports.setLib_AddressManager = void 0;
+exports.setLib_AddressManager = exports.getLib_AddressManager = void 0;
 const {rdOwnerLib_AddressManager } = require("./rdOwner");
 require("dotenv").config();
 

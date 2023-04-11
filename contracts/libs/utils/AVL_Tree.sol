@@ -10,16 +10,15 @@ contract AVL_Tree is Initializable {
         uint256[] _siblings;
     }
 
-    uint256 public levels;
+    bool isDeployed;
 
     /*╔══════════════════════════════╗
       ║          CONSTRUCTOR         ║
       ╚══════════════════════════════╝*/
 
-    function __AVL_Tree_init(uint256 _levels) internal onlyInitializing {
-        require(_levels > 0, "_levels should be greater than zero");
-        require(_levels < 40, "_levels should be less than 40");
-        levels = _levels;
+    function initialize() public initializer {
+        require(!isDeployed, "ProcessString is deployed");
+        isDeployed = true;
     }
 
     /*  ╔══════════════════════════════╗

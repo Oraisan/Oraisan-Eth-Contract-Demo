@@ -23,6 +23,13 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
   solidity: "0.8.4",
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 1
+    }
+  },
+  
   defaultNetwork: "bscTestnet",
   networks: {
     bscTestnet: {

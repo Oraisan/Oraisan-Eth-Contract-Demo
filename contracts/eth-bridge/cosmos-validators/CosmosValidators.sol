@@ -44,7 +44,7 @@ contract CosmosValidators is
         uint256 _numValidator,
         Validator[] memory _validatorSet
     ) public initializer {
-        require(currentHeight == 0, "COsmosValidator is initialize");
+        require(currentHeight == 0, "COSMOS_VALIDATORS is initialize");
         require(
             _numValidator == _validatorSet.length,
             "invalid numberValidator"
@@ -82,7 +82,7 @@ contract CosmosValidators is
         uint256 _height,
         Validator[] memory _validatorSet
     ) external {
-        require(msg.sender == resolve("OraisanGate"), "invalid sender");
+        require(msg.sender == resolve("ORAISAN_GATE"), "invalid sender");
         require(
             validatorSetAtHeight[_height].length == 0,
             "validator set was updated at height"
@@ -142,7 +142,7 @@ contract CosmosValidators is
         bytes[] memory validatorEncode = encodeValidatorSet(_validatorSet);
 
         return
-            IAVL_Tree(resolve("IAVL_Tree")).calculateRootByLeafs(
+            IAVL_Tree(resolve("IAVL_TREE")).calculateRootByLeafs(
                 validatorEncode
             );
     }
@@ -155,9 +155,18 @@ contract CosmosValidators is
         bytes1 prefixValidator = 0x10;
         bytes1 lenPubkey = 0x20;
         bytes1 lenEncodePubkey = 0x22;
-        bytes memory encodeVP = IProcessString(resolve("ProcessString")).encodeSovInt(_validator.votingPower); 
-
-        return abi.encodePacked(prefixValidator, lenEncodePubkey, prefixPubkey, lenPubkey, _validator.validatorPubKey, prefixVP, encodeVP);
+        bytes memory encodeVP = IProcessString(resolve("PROCESS_STRING"))
+            .encodeSovInt(_validator.votingPower);
+        return
+            abi.encodePacked(
+                prefixValidator,
+                lenEncodePubkey,
+                prefixPubkey,
+                lenPubkey,
+                _validator.validatorPubKey,
+                prefixVP,
+                encodeVP
+            );
     }
 
     function encodeValidatorSet(
@@ -194,7 +203,7 @@ contract CosmosValidators is
         );
 
         uint8[32] memory _blockHashArray = IProcessString(
-            resolve("ProcessString")
+            resolve("PROCESS_STRING")
         ).convertBytesToUint8Array32(_blockHash);
 
         bytes memory validatorPubkeys;
@@ -204,7 +213,7 @@ contract CosmosValidators is
         uint256 newIndex;
 
         for (i = 0; i < lenSignature; i++) {
-            validatorPubkeys = IProcessString(resolve("ProcessString"))
+            validatorPubkeys = IProcessString(resolve("PROCESS_STRING"))
                 .convertUint8Array32ToBytes(
                     _signatureValidatorProof[i].pubKeys
                 );
