@@ -11,14 +11,6 @@ interface ICosmosBlockHeader is IVerifier {
         bytes validatorHash;
     }
 
-    struct Proof {
-        string _optionName;
-        uint[2] pi_a;
-        uint[2][2] pi_b;
-        uint[2] pi_c;
-        uint[] input;
-    }
-
     function updateDataHash(uint256 _height, bytes memory _dataHash) external;
 
     function updateBlockHash(uint256 _height, bytes memory _blockHash) external;

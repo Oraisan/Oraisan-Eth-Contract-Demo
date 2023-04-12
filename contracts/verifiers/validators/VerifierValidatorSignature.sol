@@ -16,6 +16,7 @@ contract VerifierValidatorSignature {
         Pairing.G2Point B;
         Pairing.G1Point C;
     }
+
     function verifyingKey() internal pure returns (VerifyingKey memory vk) {
         vk.alfa1 = Pairing.G1Point(
             20491192805390485299153009773594534940189261866228447918068658471970481763042,
@@ -578,6 +579,7 @@ contract VerifierValidatorSignature {
             16089180110922412962897381845455271336439451960528783596175827391463816264641
         );
     }
+
     function verify(
         uint256[] memory input,
         Proof memory proof
@@ -611,6 +613,7 @@ contract VerifierValidatorSignature {
         ) return 1;
         return 0;
     }
+
     function verifyProof(
         uint[2] memory a,
         uint[2][2] memory b,
