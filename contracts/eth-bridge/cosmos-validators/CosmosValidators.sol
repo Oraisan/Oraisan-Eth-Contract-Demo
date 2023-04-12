@@ -174,7 +174,7 @@ contract CosmosValidators is
             a >>= 1;
             length++;
         }
-        return (length | (1 + 6)) / 7;
+        return (length | 1 + 6) / 7;
     }
 
     function encodeSovInt(uint256 a) public pure returns (bytes memory) {
