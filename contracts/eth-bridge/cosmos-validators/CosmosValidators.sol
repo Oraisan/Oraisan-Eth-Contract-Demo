@@ -56,7 +56,7 @@ contract CosmosValidators is
         }
 
         validatorSetAtHeight[_currentHeight] = validatorSet;
-
+      
         __Lib_AddressResolver_init(_libAddressManager);
         __Context_init_unchained();
         __Ownable_init_unchained();
@@ -147,26 +147,70 @@ contract CosmosValidators is
             );
     }
 
-    function encodeValidator(
-        Validator memory _validator
-    ) public view returns (bytes memory) {
-        bytes1 prefixVP = 0x16;
-        bytes1 prefixPubkey = 0x10;
-        bytes1 prefixValidator = 0x10;
+    // function encodeValidator(
+    //     Validator memory _validator
+    // ) public view returns (bytes memory) {
+    //     bytes1 prefixVP = 0x16;
+    //     bytes1 prefixPubkey = 0x10;
+    //     bytes1 prefixValidator = 0x10;
+    //     bytes1 lenPubkey = 0x20;
+    //     bytes1 lenEncodePubkey = 0x22;
+    //     bytes memory encodeVP = IProcessString(resolve("PROCESS_STRING"))
+    //         .encodeSovInt(_validator.votingPower);
+    //     return
+    //         abi.encodePacked(
+    //             prefixValidator,
+    //             lenEncodePubkey,
+    //             prefixPubkey,
+    //             lenPubkey,
+    //             _validator.validatorPubKey,
+    //             prefixVP,
+    //             encodeVP
+    //         );
+    // }
+    function sovInt(uint256 a) public pure returns (uint256) {
+        uint256 length = 0;
+        while (a != 0) {
+            a >>= 1;
+            length++;
+        }
+        return (length | (1 + 6)) / 7;
+    }
+
+    function encodeSovInt(uint256 a) public pure returns (bytes memory) {
+        uint256 offset = 0;
+        uint256 len = sovInt(a);
+        uint8[] memory dAtA = new uint8[](len);
+        while (a >= 1 << 7) {
+            dAtA[offset] = uint8((a & 0x7f) | 0x80);
+            a >>= 7;
+            offset++;
+        }
+        dAtA[offset] = uint8(a);
+
+        bytes memory uint8Array = new bytes(len);
+        for (uint256 i = 0; i < len; i++) {
+            uint8Array[i] = bytes1(dAtA[i]);
+        }
+        return abi.encodePacked(uint8Array);
+    }
+
+    function encodeValidator(Validator memory _validator) public pure returns (bytes memory) {
+        bytes1 prefixVP = 0x10;
+        bytes1 prefixPubkey = 0x0a;
+        bytes1 prefixValidator = 0x0a;
         bytes1 lenPubkey = 0x20;
         bytes1 lenEncodePubkey = 0x22;
-        bytes memory encodeVP = IProcessString(resolve("PROCESS_STRING"))
-            .encodeSovInt(_validator.votingPower);
-        return
-            abi.encodePacked(
-                prefixValidator,
-                lenEncodePubkey,
-                prefixPubkey,
-                lenPubkey,
-                _validator.validatorPubKey,
-                prefixVP,
-                encodeVP
-            );
+        bytes memory encodeVP = encodeSovInt(_validator.votingPower);
+        return abi.encodePacked(
+            prefixValidator,
+            lenEncodePubkey,
+            prefixPubkey,
+            lenPubkey,
+            _validator.validatorPubKey,
+            prefixVP,
+            encodeVP
+        );
     }
 
     function encodeValidatorSet(
