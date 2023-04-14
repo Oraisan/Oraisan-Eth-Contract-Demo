@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 import "./ParingValidatorSignature.sol";
 
-contract VerifierValidatorSignature {
+contract VerifierValidatorSignature_111 {
     using Pairing for *;
     struct VerifyingKey {
         Pairing.G1Point alfa1;
