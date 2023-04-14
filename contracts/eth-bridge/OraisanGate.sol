@@ -58,7 +58,7 @@ contract OraisanGate is
 
     function updateblockHeader(
         ICosmosBlockHeader.Header memory _newBlockHeader,
-        IAVL_Tree.ProofPath memory _proofBlockHashPath,
+        bytes[] memory _siblingsDataAndValPath,
         ICosmosValidators.Validator[] memory _validatorSet,
         IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
     ) external whenNotPaused {
@@ -80,10 +80,10 @@ contract OraisanGate is
         bytes memory parrent = IAVL_Tree(resolve("AVL_TREE")).hashInside(L, R);
         bytes memory root = IAVL_Tree(resolve("AVL_TREE"))
             .calulateRootBySiblings(
-                _proofBlockHashPath.index,
-                _proofBlockHashPath.total,
+                3,
+                7,
                 parrent,
-                _proofBlockHashPath.siblings
+                _siblingsDataAndValPath
             );
         require(
             keccak256(root) == keccak256(_newBlockHeader.blockHash),
