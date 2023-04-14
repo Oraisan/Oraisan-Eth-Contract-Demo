@@ -215,7 +215,7 @@ contract CosmosValidators is
 
     function encodeValidatorSet(
         Validator[] memory _validatorSet
-    ) public view returns (bytes[] memory) {
+    ) public pure returns (bytes[] memory) {
         uint256 len = _validatorSet.length;
 
         bytes[] memory a = new bytes[](len);

@@ -10,7 +10,8 @@ const main = async () => {
         "COSMOS_VALIDATORS",
         "AVL_TREE",
         "PROCESS_STRING",
-        "VERIFIER_VALIDATOR_SIGNATURE",
+        "VERIFIER_VALIDATOR_SIGNATURE_111",
+        "VERIFIER_VALIDATOR_SIGNATURE_110",
         "VERIFIER_DATA_AND_VALS"
     ]
     let setAddress;

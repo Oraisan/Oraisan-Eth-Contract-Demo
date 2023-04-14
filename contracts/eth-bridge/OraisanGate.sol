@@ -165,6 +165,8 @@ contract OraisanGate is
             msg.sender
         );
     }
+
+    
     /*  ╔══════════════════════════════╗
       ║        USERS FUNCTIONS       ║
       ╚══════════════════════════════╝ */
