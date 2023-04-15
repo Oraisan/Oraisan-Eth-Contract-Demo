@@ -279,7 +279,7 @@ contract CosmosValidators is
                 )
             ) {
                 oldIndex = _signatureValidatorProof[i].oldIndex;
-                if (_signatureValidatorProof[i].oldIndex != 0) {
+                if (_signatureValidatorProof[i].oldIndex != 100) {
                     if (
                         keccak256(validatorPubkeys) !=
                         keccak256(validatorSet[oldIndex].validatorPubKey)
