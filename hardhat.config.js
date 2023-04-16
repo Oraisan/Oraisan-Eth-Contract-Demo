@@ -32,6 +32,20 @@ module.exports = {
 
   defaultNetwork: "bscTestnet",
   networks: {
+    hardhat: {
+      allowUnlimitedContractSize: true,
+      // blockGasLimit: 5420003048,
+      accounts: [
+        {
+          privateKey:
+            "36f1ea3519a6949576c242d927dd0c74650554cdfaedbcd03fb3a80c558c03de",
+          balance: "100000000000000000000000000000",
+        },
+      ],
+      // gasPrice: 5000000000,
+      // gas: 5000000000,
+      // gas: 25e6,
+    },
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       chainId: 97,
