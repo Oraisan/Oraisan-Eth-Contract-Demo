@@ -21,10 +21,7 @@ contract CosmosValidators is
         uint256 votingPower;
     }
 
-    // struct ValidatorProof {
-    //     uint256 leaf;
-    //     uint256[] siblings;
-    // }
+
     uint256 private numValidator;
     uint256 private currentHeight;
     Validator[] private validatorSet;

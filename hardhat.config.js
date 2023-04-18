@@ -30,11 +30,11 @@ module.exports = {
     },
   },
 
-  defaultNetwork: "bscTestnet",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
-      // blockGasLimit: 5420003048,
+      blockGasLimit: 500000000,
       accounts: [
         {
           privateKey:
@@ -42,26 +42,27 @@ module.exports = {
           balance: "100000000000000000000000000000",
         },
       ],
-      // gasPrice: 5000000000,
+      gasPrice: 5000000000,
       // gas: 5000000000,
-      // gas: 25e6,
+      gas: 25e6,
     },
-    bscTestnet: {
-      url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
-      chainId: 97,
-      accounts: [`0x${PRIVATE_KEY}`],
-    },
-    rinkeby: {
-      url: INFURA_URL,
-      accounts: [`0x${PRIVATE_KEY}`],
-    },
-    kovan: {
-      url: KOVAN_URL,
-      accounts: [`0x${PRIVATE_KEY}`],
-    },
-    goerli: {
-      url: GOERLI_URL,
-      accounts: [`0x${PRIVATE_KEY}`],
-    },
+    // bscTestnet: {
+    //   url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+    //   chainId: 97,
+    //   accounts: [`0x${PRIVATE_KEY}`],
+    //   gas: 3e6,
+    // },
+    // rinkeby: {
+    //   url: INFURA_URL,
+    //   accounts: [`0x${PRIVATE_KEY}`],
+    // },
+    // kovan: {
+    //   url: KOVAN_URL,
+    //   accounts: [`0x${PRIVATE_KEY}`],
+    // },
+    // goerli: {
+    //   url: GOERLI_URL,
+    //   accounts: [`0x${PRIVATE_KEY}`],
+    // },
   },
 };

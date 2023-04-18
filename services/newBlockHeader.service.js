@@ -57,6 +57,15 @@ async function newBlockHeaderService(data) {
     process.env.ORAISAN_GATE
   );
 
+  let newValidators32 = newValidators.slice(0, 32);
+  console.log("lenght", newValidators32.length);
+  // console.log("newValidators32", newValidators32);
+  let newProofs32 = newProofs.slice(0, 32);
+  let newProof3 = newProofs.slice(32, 35);
+
+  await OraisanGate.verifyBlockHeader(newBlockData, newAunts, newValidators);
+  await OraisanGate.updateBlockHeader(newBlockData.height, newProof3);
+
   // let result = await OraisanGate.updateblockHeader(
   //   newBlockData,
   //   newAunts,
