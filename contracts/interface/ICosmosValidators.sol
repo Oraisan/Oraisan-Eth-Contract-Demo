@@ -4,40 +4,36 @@ import {IVerifier} from "./IVerifier.sol";
 import {ICosmosBlockHeader} from "./ICosmosBlockHeader.sol";
 
 interface ICosmosValidators {
-    
     function updateValidatorSet(
-        uint256 height,
-        uint8[] memory validatorPubKeyL,
-        uint8[] memory validatorPubKeyR
+        uint256 _height,
+        address[] memory _validatorLeft,
+        address[] memory _validatorRight
     ) external;
 
     function updateValidatorSetByProof() external;
 
     function verifyNewHeader(
-        ICosmosBlockHeader.Header memory newBlockHeader,
-        IVerifier.ValidatorHashProof[2] memory validatorHashProof,
-        IVerifier.SignatureValidatorProof[] memory signatureValidatorProof
+        ICosmosBlockHeader.Header memory _newBlockHeader,
+        IVerifier.ValidatorHashLeftProof memory _validatorHashLeftProof,
+        IVerifier.ValidatorHashRightProof memory _validatorHashRightProof,
+        IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
     ) external returns (bool);
 
-    function verifyValidatorHash(
-        bytes memory validatorHash,
-        IVerifier.ValidatorHashProof[2] memory validatorHashProof
+    function verifyValidatorHashRight(
+        ICosmosBlockHeader.Header memory _newBlockHeader,
+        IVerifier.ValidatorHashRightProof memory _validatorHashRightProof
     ) external returns (bool);
 
-    function verifySignaturesHeader(
-        uint256 height,
-        bytes memory blockHash,
-        uint256 blockTime,
-        IVerifier.ValidatorHashProof[2] memory validatorHashProof,
-        IVerifier.SignatureValidatorProof[] memory signatureValidatorProof
+    function verifyValidatorHashLeft(
+        address _validatorHash,
+        IVerifier.ValidatorHashLeftProof memory _validatorHashLeftProof
     ) external returns (bool);
 
     function verifyProofSignature(
-        uint256 height,
-        uint8[32] memory blockHash,
-        uint256 blockTime,
-        IVerifier.SignatureValidatorProof memory signatureValidatorProof
-    ) external view returns (bool);
+        ICosmosBlockHeader.Header memory _newBlockHeader,
+        address _validatorAddress,
+        IVerifier.SignatureValidatorProof memory _signatureValidatorProof
+    )  external returns (bool);
 
     function getCurrentBlockHeight() external view returns (uint256);
 
@@ -49,4 +45,8 @@ interface ICosmosValidators {
         uint256 height,
         uint256 index
     ) external view returns (bytes memory);
+
+    function getValidatorHeight(
+        bytes memory _pubkey
+    ) external view returns (uint256);
 }

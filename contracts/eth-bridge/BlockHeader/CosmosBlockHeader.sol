@@ -18,13 +18,13 @@ contract CosmosBlockHeader is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
-    uint256 private currentHeight;
-    bytes private blockHash;
-    bytes private dataHash;
-    bytes private validatorHash;
+    uint256 internal currentHeight;
+    address internal blockHash;
+    address internal dataHash;
+    address internal validatorHash;
 
-    mapping(uint256 => bytes) public dataHashAtHeight;
-    mapping(uint256 => bytes) public blockHashAtHeight;
+    mapping(uint256 => address) public dataHashAtHeight;
+    mapping(uint256 => address) public blockHashAtHeight;
 
     // struct DataHashProof {
     //     uint256 leaf;
@@ -42,9 +42,9 @@ contract CosmosBlockHeader is
     function initialize(
         address _libAddressManager,
         uint256 _height,
-        bytes memory _blockHash,
-        bytes memory _dataHash,
-        bytes memory _validatorHash
+        address _blockHash,
+        address _dataHash,
+        address _validatorHash
     ) public initializer {
         require(currentHeight == 0, "CosmosBlockHeader is initialized");
         currentHeight = _height;
@@ -79,9 +79,12 @@ contract CosmosBlockHeader is
         ║        ADMIN FUNCTIONS       ║
         ╚══════════════════════════════╝       */
 
-    function updateDataHash(uint256 _height, bytes memory _dataHash) external {
+    function updateDataHash(
+        uint256 _height,
+        address _dataHash
+    ) external {
         require(msg.sender == resolve("ORAISAN_GATE"), "invalid sender");
-        require(dataHashAtHeight[_height].length == 0, "datahash is existed");
+        require(dataHashAtHeight[_height] == address(0), "datahash is existed");
         // require(keccak256(blockHash) == keccak256(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
         dataHash = _dataHash;
         dataHashAtHeight[_height] = _dataHash;
@@ -89,7 +92,7 @@ contract CosmosBlockHeader is
 
     function updateBlockHash(
         uint256 _height,
-        bytes memory _blockHash
+        address _blockHash
     ) external {
         require(msg.sender == resolve("ORAISAN_GATE"), "invalid sender");
         require(
@@ -98,68 +101,10 @@ contract CosmosBlockHeader is
                     .getCurrentBlockHeight(),
             "invalid  height header"
         );
-        require(blockHashAtHeight[_height].length == 0, "blockHash is existed");
+        require(blockHashAtHeight[_height] == address(0), "blockHash is existed");
         currentHeight = _height;
         blockHash = _blockHash;
         blockHashAtHeight[_height] = blockHash;
-    }
-
-    /*  ╔══════════════════════════════╗
-        ║        ENCODE FUNCTIONS       ║
-        ╚══════════════════════════════╝       */
-
-    function cdcEncode(bytes memory _str) public pure returns (bytes memory) {
-        bytes1  prefix = 0x0a;
-        bytes1 len = 0x20;
-        return abi.encodePacked(prefix, len, _str);
-    }
-
-    function createLeaf(
-        bytes memory _headerAttribute
-    ) public view returns (bytes memory) {
-        return
-            IAVL_Tree(resolve("AVL_TREE")).hashLeaf(
-                cdcEncode(_headerAttribute)
-            );
-    }
-
-    /*  ╔══════════════════════════════╗
-        ║        VERIFY FUNCTIONS      ║
-        ╚══════════════════════════════╝       */
-    function verifyDataAndValsHash(
-        IVerifier.DataAndValsHashProof memory _dataAndValsHashProof,
-        uint8[32] memory _dataHash,
-        uint8[32] memory _validatorHash,
-        uint8[32] memory _blockHash
-    ) public view returns (bool) {
-        string memory optionName = _dataAndValsHashProof.optionName;
-
-        uint[2] memory a = _dataAndValsHashProof.pi_a;
-        uint[2][2] memory b = _dataAndValsHashProof.pi_b;
-        uint[2] memory c = _dataAndValsHashProof.pi_c;
-        uint256[] memory input = new uint256[](96);
-        for (uint256 i = 0; i < 32; i++) {
-            input[i] = _dataHash[i];
-            input[i + 32] = _validatorHash[i];
-            input[i + 64] = _blockHash[i];
-        }
-        return _verifyProof(optionName, a, b, c, input);
-    }
-
-    function _verifyProof(
-        string memory _optionName, //Ex: VERIFIER_AGE
-        uint[2] memory pi_a,
-        uint[2][2] memory pi_b,
-        uint[2] memory pi_c,
-        uint[] memory input
-    ) internal view returns (bool) {
-        return
-            IVerifier(resolve(_optionName)).verifyProof(
-                pi_a,
-                pi_b,
-                pi_c,
-                input
-            );
     }
 
     /*  ╔══════════════════════════════╗
@@ -170,19 +115,21 @@ contract CosmosBlockHeader is
         return currentHeight;
     }
 
-    function getCurrentBlockHash() public view returns (bytes memory) {
+    function getCurrentBlockHash() public view returns (address) {
         return blockHash;
     }
 
-    function getBlockHash(uint256 _height) public view returns (bytes memory) {
+    function getBlockHash(
+        uint256 _height
+    ) public view returns (address) {
         return blockHashAtHeight[_height];
     }
 
-    function getCurrentDataHash() public view returns (bytes memory) {
+    function getCurrentDataHash() public view returns (address) {
         return dataHash;
     }
 
-    function getDataHash(uint256 _height) public view returns (bytes memory) {
+    function getDataHash(uint256 _height) public view returns (address) {
         return dataHashAtHeight[_height];
     }
 }
