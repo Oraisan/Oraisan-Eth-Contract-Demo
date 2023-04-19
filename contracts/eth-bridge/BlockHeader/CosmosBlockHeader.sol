@@ -6,6 +6,7 @@ import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 import {ICosmosValidators} from "../../interface/ICosmosValidators.sol";
 import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 
+import "hardhat/console.sol";
 import "../../libs/Lib_AddressResolver.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
@@ -53,6 +54,8 @@ contract CosmosBlockHeader is
 
         dataHashAtHeight[_height] = _dataHash;
         blockHashAtHeight[_height] = _blockHash;
+
+        // console.log("_libAddressManager :", _libAddressManager);
 
         __Lib_AddressResolver_init(_libAddressManager);
         __Context_init_unchained();
@@ -106,7 +109,9 @@ contract CosmosBlockHeader is
         ╚══════════════════════════════╝       */
 
     function cdcEncode(bytes memory _str) public pure returns (bytes memory) {
-        return _str;
+        bytes1  prefix = 0x0a;
+        bytes1 len = 0x20;
+        return abi.encodePacked(prefix, len, _str);
     }
 
     function createLeaf(

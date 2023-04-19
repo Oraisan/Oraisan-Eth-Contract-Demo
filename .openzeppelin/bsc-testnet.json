@@ -59,6 +59,41 @@
       "address": "0x66913A0CF745FD8f834Fa6Ca5a6832d6Df0f960c",
       "txHash": "0xe180400a05355f958bd63917dbbe35ec84960112811da8a4179bbf460e8dc8c3",
       "kind": "transparent"
+    },
+    {
+      "address": "0x4506A373BFfDf5F113d4f40f7CA7A4CAB4f1C91d",
+      "txHash": "0x8c19550b80fed10134d34bb06a8547fc575b5d675733a7cceee3a69c32a61c43",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x413A6eA8A3BA9C87Bf86a26210706AB830722C36",
+      "txHash": "0xaaf3a4715862be22cb5e0cff142440a332a39cfdcd493c7d7080505d69b8753a",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x9DDA398aA04AEff08e5C5544197888fe93906d24",
+      "txHash": "0x00a07483a8989dc4625174945246421544fbfa3affd927a92bf4ea8a9dd02938",
+      "kind": "transparent"
+    },
+    {
+      "address": "0xda2b7a0c8b8A79c9c2e9D3859d20E08Fc0353350",
+      "txHash": "0x0210f212fd46e266a79079d16dd2b2f5e959ff7f2892265b5bd5ee9d3984fdcd",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x283735e0cE91FF66D203E1Bb793b3135D7B87049",
+      "txHash": "0x37fb1a555d969c2f4b4a51f6c3be3fce7d2bcb0f227bfbd9a2e98b64c4067864",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x86fC2b1FF8a7Adb476290eEA310a7fC5DFcb12e9",
+      "txHash": "0xca518bbcfea962d27e9d147977384caf01ab7c7d9d15175d8e162cc5a5d4c637",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x491760EB0993EA2350aA2b94c8656CeB270c117C",
+      "txHash": "0x7ba9e0ded8477272263a0ddfef95677a71da3046294a0436aa59787e4d71d107",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -1255,6 +1290,232 @@
           "t_contract(Lib_AddressManager)4043": {
             "label": "contract Lib_AddressManager",
             "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        }
+      }
+    },
+    "3e3aac21e19cfd8aedab461c12a9836e136145b66e921d587fffcd2ac6f4a071": {
+      "address": "0x0201A82978D994234715237fe493d3E43437cd66",
+      "txHash": "0x878ddeaf5bc6d362dfbb420aadbb5be096eee82094a8758b7ab46c4558e8830f",
+      "layout": {
+        "solcVersion": "0.8.4",
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint8",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:62",
+            "retypedFrom": "bool"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:67"
+          },
+          {
+            "label": "libAddressManager",
+            "offset": 2,
+            "slot": "0",
+            "type": "t_contract(Lib_AddressManager)1777",
+            "contract": "Lib_AddressResolver",
+            "src": "contracts/libs/Lib_AddressResolver.sol:12"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:94"
+          },
+          {
+            "label": "_paused",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_bool",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:29"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "102",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "PausableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol:116"
+          },
+          {
+            "label": "_status",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_uint256",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "152",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "ReentrancyGuardUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:80"
+          },
+          {
+            "label": "status",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_uint256",
+            "contract": "OraisanGate",
+            "src": "contracts/eth-bridge/OraisanGate.sol:40"
+          },
+          {
+            "label": "newBlockHeaders",
+            "offset": 0,
+            "slot": "202",
+            "type": "t_mapping(t_uint256,t_struct(Header)1350_storage)",
+            "contract": "OraisanGate",
+            "src": "contracts/eth-bridge/OraisanGate.sol:41"
+          },
+          {
+            "label": "validatorSets",
+            "offset": 0,
+            "slot": "203",
+            "type": "t_mapping(t_uint256,t_array(t_struct(Validator)1439_storage)dyn_storage)",
+            "contract": "OraisanGate",
+            "src": "contracts/eth-bridge/OraisanGate.sol:43"
+          },
+          {
+            "label": "isVerifieds",
+            "offset": 0,
+            "slot": "204",
+            "type": "t_mapping(t_uint256,t_bool)",
+            "contract": "OraisanGate",
+            "src": "contracts/eth-bridge/OraisanGate.sol:44"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_struct(Validator)1439_storage)dyn_storage": {
+            "label": "struct ICosmosValidators.Validator[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_contract(Lib_AddressManager)1777": {
+            "label": "contract Lib_AddressManager",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_uint256,t_array(t_struct(Validator)1439_storage)dyn_storage)": {
+            "label": "mapping(uint256 => struct ICosmosValidators.Validator[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_bool)": {
+            "label": "mapping(uint256 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Header)1350_storage)": {
+            "label": "mapping(uint256 => struct ICosmosBlockHeader.Header)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Header)1350_storage": {
+            "label": "struct ICosmosBlockHeader.Header",
+            "members": [
+              {
+                "label": "height",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "blockHash",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "blockTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "dataHash",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "validatorHash",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_struct(Validator)1439_storage": {
+            "label": "struct ICosmosValidators.Validator",
+            "members": [
+              {
+                "label": "validatorPubKey",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "votingPower",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
           },
           "t_uint256": {
             "label": "uint256",

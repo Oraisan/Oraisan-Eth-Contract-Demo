@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 interface IVerifier {
+
     // Ex optionName = "VERIFIER_DATA_AND_VAL"
     struct DataAndValsHashProof {
         string optionName;
