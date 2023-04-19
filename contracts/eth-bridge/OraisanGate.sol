@@ -55,7 +55,13 @@ contract OraisanGate is
     /*  ╔══════════════════════════════╗
         ║        ADMIN FUNCTIONS       ║
         ╚══════════════════════════════╝       */
-
+/*
+    2 phase
+    1st phase: _newBlockHeader, __siblingsDataAndValPath, _validatorSet
+    Verify ....
+    if ok 
+    2nd phase: _signatureValidatorProof, _newBlockHeader
+ */
     function updateblockHeader(
         ICosmosBlockHeader.Header memory _newBlockHeader,
         bytes[] memory _siblingsDataAndValPath,
