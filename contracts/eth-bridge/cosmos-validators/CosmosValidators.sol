@@ -16,16 +16,15 @@ contract CosmosValidators is
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
 {
-    struct Validator {
-        bytes validatorPubKey;
-        uint256 votingPower;
-    }
+    bytes validatorPubKey;
+    // uint256 votingPower;
 
+    uint256 internal numValidator;
+    uint256 internal currentHeight;
+    bytes[] internal validatorSet;
 
-    uint256 private numValidator;
-    uint256 private currentHeight;
-    Validator[] private validatorSet;
-    mapping(uint256 => Validator[]) private validatorSetAtHeight;
+    mapping(uint256 => bytes[]) internal validatorSetAtHeight;
+    mapping(bytes => uint256) internal validatorHeight;
 
     /*╔══════════════════════════════╗
       ║            EVENTS            ║
@@ -38,22 +37,22 @@ contract CosmosValidators is
     function initialize(
         address _libAddressManager,
         uint256 _currentHeight,
-        uint256 _numValidator,
-        Validator[] memory _validatorSet
+        bytes[] memory _validatorSet
     ) public initializer {
         require(currentHeight == 0, "COSMOS_VALIDATORS is initialize");
-        require(
-            _numValidator == _validatorSet.length,
-            "invalid numberValidator"
-        );
+
+        numValidator = _validatorSet.length;
         currentHeight = _currentHeight;
-        numValidator = _numValidator;
-        for (uint256 i = 0; i < _numValidator; i++) {
+
+        uint256 i = 0;
+
+        for (i = 0; i < numValidator; i++) {
             validatorSet.push(_validatorSet[i]);
+            validatorHeight[_validatorSet[i]] = _currentHeight;
         }
 
         validatorSetAtHeight[_currentHeight] = validatorSet;
-      
+
         __Lib_AddressResolver_init(_libAddressManager);
         __Context_init_unchained();
         __Ownable_init_unchained();
@@ -77,47 +76,138 @@ contract CosmosValidators is
         ╚══════════════════════════════╝       */
     function updateValidatorSet(
         uint256 _height,
-        Validator[] memory _validatorSet
+        uint8[] memory validatorPubKeyL,
+        uint8[] memory validatorPubKeyR
     ) external {
         require(msg.sender == resolve("ORAISAN_GATE"), "invalid sender");
         require(
             validatorSetAtHeight[_height].length == 0,
             "validator set was updated at height"
         );
+
         currentHeight = _height;
-        uint256 len = _validatorSet.length;
-        // validatorSet = new Validator[](len);
+
+        uint256 lenL = validatorPubKeyL.length;
+        uint256 lenR = validatorPubKeyR.length;
+        // validatorSet = new bytes[](len);
         delete validatorSet;
 
-        for (uint256 i = 0; i < len; i++) {
-            validatorSet.push(validatorSet[i]);
+        uint256 i;
+        uint256 k;
+
+        uint8[32] memory pubkey;
+
+        for (i = 0; i < lenL; i++) {
+            for (k = 0; k < 32; k++) {
+                pubkey[k] = validatorPubKeyL[i * 32 + k];
+            }
+
+            validatorSet.push(
+                IProcessString(resolve("PROCESS_STRING")).convertUint8Array32ToBytes(pubkey)
+            );
+            validatorHeight[validatorSet[i]] = _height;
         }
+
+        for (i = 0; i < lenR; i++) {
+            for (k = 0; k < 32; k++) {
+                pubkey[k] = validatorPubKeyR[i * 32 + k];
+            }
+
+            validatorSet.push(
+                IProcessString(resolve("PROCESS_STRING")).convertUint8Array32ToBytes(pubkey)
+            );
+            validatorHeight[validatorSet[lenL + i]] = _height;
+        }
+
         validatorSetAtHeight[_height] = validatorSet;
-        numValidator = len;
+        numValidator = lenL + lenR;
     }
 
     // bridge validator
     function updateValidatorSetByProof() external {}
 
+    /*  ╔══════════════════════════════╗
+        ║        VERIFY FUNCTIONS      ║
+        ╚══════════════════════════════╝       */
     function verifyNewHeader(
         ICosmosBlockHeader.Header memory _newBlockHeader,
-        Validator[] memory _validatorSet,
+        IVerifier.ValidatorHashProof[2] memory _validatorHashProof,
         IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
     ) public returns (bool) {
+        uint256 i;
+        uint256 j;
+        uint256 k;
+
         require(
-            verifyValidatorHash(_newBlockHeader.validatorHash, _validatorSet),
-            "invalid validator hash"
+            3 *
+                (_validatorHashProof[0].totalVPsigned +
+                    _validatorHashProof[1].totalVPsigned) >
+                2 *
+                    (_validatorHashProof[0].totalVP +
+                        _validatorHashProof[1].totalVP),
+            "Invalid total voting power"
         );
-        require(
-            verifySignaturesHeader(
-                _newBlockHeader.height,
-                _newBlockHeader.blockHash,
-                _newBlockHeader.blockTime,
-                _validatorSet,
-                _signatureValidatorProof
-            ),
-            "invalid validator set"
-        );
+
+        uint8[32] memory validatorHash = IProcessString(resolve("PROCESS_STRING"))
+            .convertBytesToUint8Array32(_newBlockHeader.validatorHash);
+
+        uint256 lenSignature = _signatureValidatorProof.length;
+        uint256 idxSignature;
+        uint8[32] memory pubkey;
+
+        uint256 cnt = 0;
+
+        for (i = 0; i < 2; i++) {
+            // verify blockHash
+            string memory validatorHashVerifierName;
+            if (i == 0) {
+                validatorHashVerifierName = "VALIDATORS_LEFT";
+            } else {
+                validatorHashVerifierName = "VALIDATOR_RIGHT";
+            }
+
+            require(
+                verifyValidatorHash(
+                    validatorHashVerifierName,
+                    validatorHash,
+                    _validatorHashProof[i]
+                ),
+                "invalid validator hash"
+            );
+
+            //verify validator
+            uint256 len = _validatorHashProof[i].signed.length;
+            for (j = 0; j < len; j++) {
+                for (k = 0; k < 32; k++) {
+                    pubkey[k] = _validatorHashProof[i].validatorPubKey[
+                        j * 32 + k
+                    ];
+                }
+
+                idxSignature = _validatorHashProof[i].signed[j];
+                if (idxSignature < lenSignature) {
+                    require(
+                        verifyProofSignature(
+                            _newBlockHeader,
+                            pubkey,
+                            _signatureValidatorProof[idxSignature]
+                        ),
+                        "invalid validator set"
+                    );
+                }
+
+                if (
+                    getValidatorHeight(
+                        IProcessString(resolve("PROCESS_STRING"))
+                            .convertUint8Array32ToBytes(pubkey)
+                    ) == currentHeight
+                ) {
+                    cnt++;
+                }
+            }
+        }
+
+        require(3 * cnt > 2 * numValidator, "invalid number of validators");
         return true;
     }
 
@@ -126,220 +216,77 @@ contract CosmosValidators is
         ╚══════════════════════════════╝       */
 
     function verifyValidatorHash(
-        bytes memory _validatorHash,
-        Validator[] memory _validatorSet
-    ) public returns (bool) {
-        bytes memory rootValidator = calculateValidatorHash(_validatorSet);
-        return keccak256(_validatorHash) == keccak256(rootValidator);
-    }
+        string memory _optionName,
+        uint8[32] memory _validatorHash,
+        IVerifier.ValidatorHashProof memory _validatorHashProof
+    ) public view returns (bool) {
+        uint[2] memory a = _validatorHashProof.pi_a;
+        uint[2][2] memory b = _validatorHashProof.pi_b;
+        uint[2] memory c = _validatorHashProof.pi_c;
 
-    function calculateValidatorHash(
-        Validator[] memory _validatorSet
-    ) public returns (bytes memory) {
-        bytes[] memory validatorEncode = encodeValidatorSet(_validatorSet);
+        uint256 totalVPsigned = _validatorHashProof.totalVPsigned;
+        uint256 totalVP = _validatorHashProof.totalVP;
 
-        return
-            IAVL_Tree(resolve("IAVL_TREE")).calculateRootByLeafs(
-                validatorEncode
-            );
-    }
+        uint256 len = _validatorHashProof.signed.length;
 
-    // function encodeValidator(
-    //     Validator memory _validator
-    // ) public view returns (bytes memory) {
-    //     bytes1 prefixVP = 0x16;
-    //     bytes1 prefixPubkey = 0x10;
-    //     bytes1 prefixValidator = 0x10;
-    //     bytes1 lenPubkey = 0x20;
-    //     bytes1 lenEncodePubkey = 0x22;
-    //     bytes memory encodeVP = IProcessString(resolve("PROCESS_STRING"))
-    //         .encodeSovInt(_validator.votingPower);
-    //     return
-    //         abi.encodePacked(
-    //             prefixValidator,
-    //             lenEncodePubkey,
-    //             prefixPubkey,
-    //             lenPubkey,
-    //             _validator.validatorPubKey,
-    //             prefixVP,
-    //             encodeVP
-    //         );
-    // }
-    function sovInt(uint256 a) public pure returns (uint256) {
-        uint256 length = 0;
-        while (a != 0) {
-            a >>= 1;
-            length++;
-        }
-        return (length | 1 + 6) / 7;
-    }
-
-    function encodeSovInt(uint256 a) public pure returns (bytes memory) {
-        uint256 offset = 0;
-        uint256 len = sovInt(a);
-        uint8[] memory dAtA = new uint8[](len);
-        while (a >= 1 << 7) {
-            dAtA[offset] = uint8((a & 0x7f) | 0x80);
-            a >>= 7;
-            offset++;
-        }
-        dAtA[offset] = uint8(a);
-
-        bytes memory uint8Array = new bytes(len);
-        for (uint256 i = 0; i < len; i++) {
-            uint8Array[i] = bytes1(dAtA[i]);
-        }
-        return abi.encodePacked(uint8Array);
-    }
-
-    function encodeValidator(Validator memory _validator) public pure returns (bytes memory) {
-        bytes1 prefixVP = 0x10;
-        bytes1 prefixPubkey = 0x0a;
-        bytes1 prefixValidator = 0x0a;
-        bytes1 lenPubkey = 0x20;
-        bytes1 lenEncodePubkey = 0x22;
-        bytes memory encodeVP = encodeSovInt(_validator.votingPower);
-        return abi.encodePacked(
-            prefixValidator,
-            lenEncodePubkey,
-            prefixPubkey,
-            lenPubkey,
-            _validator.validatorPubKey,
-            prefixVP,
-            encodeVP
+        require(
+            len * 32 == _validatorHashProof.validatorPubKey.length,
+            "invalid validatorHashProof"
         );
-    }
 
-    function encodeValidatorSet(
-        Validator[] memory _validatorSet
-    ) public pure returns (bytes[] memory) {
-        uint256 len = _validatorSet.length;
+        uint256[] memory input = new uint256[](2 + len * 34);
+        uint256 i;
 
-        bytes[] memory a = new bytes[](len);
+        input[0] = totalVPsigned;
+        input[1] = totalVP;
 
-        for (uint256 i = 0; i < len; i++) {
-            a[i] = encodeValidator(_validatorSet[i]);
+        for (i = 0; i < len; i++) {
+            input[i + 2] = (_validatorHashProof.signed[i] < 100) ? 1 : 0;
         }
-        return a;
+
+        for (i = 0; i < 32 * len; i++) {
+            input[i + 2 + len] = _validatorHashProof.validatorPubKey[i];
+        }
+
+        for (i = 0; i < len; i++) {
+            input[i + 2 + 33 * len] = _validatorHash[i];
+        }
+
+        return _verifyProof(_optionName, a, b, c, input);
     }
 
     /*  ╔══════════════════════════════╗
         ║     SIGNATURES FUNCTIONS     ║
         ╚══════════════════════════════╝       */
 
-    function verifySignaturesHeader(
-        uint256 _height,
-        bytes memory _blockHash,
-        uint256 _blockTime,
-        Validator[] memory _newValidatorSet,
-        IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
-    ) public returns (bool) {
-        uint256 lenValidator = _newValidatorSet.length;
-        uint256 lenSignature = _signatureValidatorProof.length;
-        uint256 i;
-
-        require(
-            lenSignature <= lenValidator,
-            "invalid the number of validator"
-        );
-
-        uint8[32] memory _blockHashArray = IProcessString(
-            resolve("PROCESS_STRING")
-        ).convertBytesToUint8Array32(_blockHash);
-
-        bytes memory validatorPubkeys;
-        uint256 totalValidVP = 0;
-        uint256 cnt = 0;
-        uint256 oldIndex;
-        uint256 newIndex;
-
-        for (i = 0; i < lenSignature; i++) {
-            validatorPubkeys = IProcessString(resolve("PROCESS_STRING"))
-                .convertUint8Array32ToBytes(
-                    _signatureValidatorProof[i].pubKeys
-                );
-            newIndex = _signatureValidatorProof[i].newIndex;
-
-            if (
-                keccak256(validatorPubkeys) !=
-                keccak256(_newValidatorSet[newIndex].validatorPubKey)
-            ) {
-                continue;
-            }
-
-            if (
-                verifyProofSignature(
-                    _height,
-                    _blockHashArray,
-                    _blockTime,
-                    _signatureValidatorProof[i]
-                )
-            ) {
-                oldIndex = _signatureValidatorProof[i].oldIndex;
-                if (_signatureValidatorProof[i].oldIndex != 100) {
-                    if (
-                        keccak256(validatorPubkeys) !=
-                        keccak256(validatorSet[oldIndex].validatorPubKey)
-                    ) {
-                        continue;
-                    }
-
-                    cnt++;
-                }
-
-                totalValidVP += _newValidatorSet[newIndex].votingPower;
-            }
-        }
-
-        uint256 totalVP = 0;
-        for (i = 0; i < lenValidator; i++) {
-            totalVP += _newValidatorSet[i].votingPower;
-        }
-
-        if (cnt < (validatorSet.length * 2) / 3) {
-            return false;
-        }
-
-        if (totalValidVP < (totalVP * 2) / 3) {
-            return false;
-        }
-        return true;
-    }
-
     function verifyProofSignature(
-        uint256 _height,
-        uint8[32] memory _blockHash,
-        uint256 _blockTime,
+        ICosmosBlockHeader.Header memory _newBlockHeader,
+        uint8[32] memory _pubkey,
         IVerifier.SignatureValidatorProof memory _signatureValidatorProof
-    ) public view returns (bool) {
-        string memory optionName = _signatureValidatorProof.optionName;
-
+    ) public returns (bool) {
         uint[2] memory a = _signatureValidatorProof.pi_a;
         uint[2][2] memory b = _signatureValidatorProof.pi_b;
         uint[2] memory c = _signatureValidatorProof.pi_c;
+        uint256[] memory input = new uint256[](66);
 
-        uint8[32] memory pubKeys = _signatureValidatorProof.pubKeys;
-        uint8[32] memory R8 = _signatureValidatorProof.R8;
-        uint8[32] memory S = _signatureValidatorProof.S;
-
-        uint256[] memory input = new uint256[](130);
         uint256 i;
 
-        input[0] = _height;
+        uint8[32] memory blockHash = IProcessString(resolve("PROCESS_STRING"))
+            .convertBytesToUint8Array32(_newBlockHeader.blockHash);
+
+        input[0] = _newBlockHeader.height;
 
         for (i = 0; i < 32; i++) {
-            input[i + 1] = _blockHash[i];
+            input[i + 1] = blockHash[i];
         }
 
-        input[i + 33] = _blockTime;
+        input[33] = _newBlockHeader.blockTime;
 
         for (i = 0; i < 32; i++) {
-            input[i + 34] = pubKeys[i];
-            input[i + 66] = R8[i];
-            input[i + 98] = S[i];
+            input[i + 34] = _pubkey[i];
         }
 
-        return _verifyProof(optionName, a, b, c, input);
+        return _verifyProof("VALIDATOR_SIGNATURE", a, b, c, input);
     }
 
     function _verifyProof(
@@ -368,15 +315,21 @@ contract CosmosValidators is
 
     function getValidatorSetAtHeight(
         uint256 _height
-    ) public view returns (Validator[] memory) {
+    ) public view returns (bytes[] memory) {
         return validatorSetAtHeight[_height];
     }
 
     function getValidatorAtHeight(
         uint256 _height,
         uint256 _index
-    ) public view returns (Validator memory) {
+    ) public view returns (bytes memory) {
         require(_index < validatorSetAtHeight[_height].length, "invalid index");
         return validatorSetAtHeight[_height][_index];
+    }
+
+    function getValidatorHeight(
+        bytes memory pubkey
+    ) public view returns (uint256) {
+        return validatorHeight[pubkey];
     }
 }

@@ -35,7 +35,7 @@ contract OraisanGate is
     uint256 status;
 
     mapping (uint256 => ICosmosBlockHeader.Header ) newBlockHeaders;
-    mapping (uint256=>ICosmosValidators.Validator[]) validatorSets;
+    mapping (uint256=> bytes[]) validatorSets;
     mapping (uint256 => bool) isVerifieds;
 
     function initialize(address _libAddressManager) public initializer {
@@ -63,46 +63,22 @@ contract OraisanGate is
         ║        ADMIN FUNCTIONS       ║
         ╚══════════════════════════════╝       */
 
-    function updateBlockHeader (
-        uint256 _blockHeight,
+    function updateblockHeaderV2(
+        ICosmosBlockHeader.Header memory _newBlockHeader,
+        bytes[] memory _siblingsDataAndValPath,
+        IVerifier.ValidatorHashProof[2] memory _validatorHashProof,
         IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
-    )external whenNotPaused {
-        
-        require(isVerifieds[_blockHeight] == false, "Block header is verified");
+    ) external whenNotPaused {
         require(
             ICosmosValidators(resolve("COSMOS_VALIDATORS")).verifyNewHeader(
-               newBlockHeaders[_blockHeight],
-                validatorSets[_blockHeight],
+                _newBlockHeader,
+                _validatorHashProof,
                 _signatureValidatorProof
             ),
             "invalid validator signature"
         );
-        ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSet(
-            _blockHeight,
-            validatorSets[_blockHeight]
-        );
-        ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateBlockHash(
-            _blockHeight,
-            newBlockHeaders[_blockHeight].blockHash
-        );
-        isVerifieds[_blockHeight] = true;
-        emit BlockHeaderUpdated(
-            _blockHeight,
-            newBlockHeaders[_blockHeight].blockHash,
-            msg.sender
-        );
-    }
 
-    function verifyBlockHeader(
-        ICosmosBlockHeader.Header memory _newBlockHeader,
-        bytes[] memory _siblingsDataAndValPath,
-        ICosmosValidators.Validator[] memory _validatorSet
-    ) external whenNotPaused {
         uint256 height = _newBlockHeader.height;
-
-        // // get address of cosmos block header
-        // address cosmosBlockHeader = resolve("COSMOS_BLOCK_HEADER");
-        // console.log("cosmosBlockHeader", cosmosBlockHeader);
 
         bytes memory L = ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
             .createLeaf(_newBlockHeader.dataHash);
@@ -120,128 +96,18 @@ contract OraisanGate is
                 parrent,
                 _siblingsDataAndValPath
             );
+
         require(
             keccak256(root) == keccak256(_newBlockHeader.blockHash),
             "invalid blockHash"
         );
 
-        // update blockHeaderPhases
-        for (uint256 i = 0; i < _validatorSet.length; i++) {
-            validatorSets[height].push(_validatorSet[i]);
-        }
-        newBlockHeaders[height] = _newBlockHeader;
-        isVerifieds[height] = false;
-
-        emit BlockHeaderUpdated(
-            _newBlockHeader.height,
-            _newBlockHeader.blockHash,
-            msg.sender
-        );
-    }
-
-    // function ac(
-    //     ICosmosBlockHeader.Header memory _newBlockHeader,
-    //     bytes[] memory _siblingsDataAndValPath,
-    //     ICosmosValidators.Validator[] memory _validatorSet,
-    //      IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
-    //  ) public view returns (uint256) {
-    //     return 1;
-    //  }
-
-    // function updateblockHeaderTest(
-    //     ICosmosBlockHeader.Header memory _newBlockHeader,
-    //     bytes[] memory _siblingsDataAndValPath,
-    //     ICosmosValidators.Validator[] memory _validatorSet,
-    //     IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
-    // ) public whenNotPaused {
-    //     // require(
-    //     //     ICosmosValidators(resolve("COSMOS_VALIDATORS")).verifyNewHeader(
-    //     //         _newBlockHeader,
-    //     //         _validatorSet,
-    //     //         _signatureValidatorProof
-    //     //     ),
-    //     //     "invalid validator signature"
-    //     // );
-
-    //     // uint256 height = _newBlockHeader.height;
-
-    //     // bytes memory L = ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
-    //     //     .createLeaf(_newBlockHeader.dataHash);
-    //     // bytes memory R = ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
-    //     //     .createLeaf(_newBlockHeader.validatorHash);
-    //     // bytes memory parrent = IAVL_Tree(resolve("AVL_TREE")).hashInside(L, R);
-    //     // bytes memory root = IAVL_Tree(resolve("AVL_TREE"))
-    //     //     .calulateRootBySiblings(
-    //     //         3,
-    //     //         7,
-    //     //         parrent,
-    //     //         _siblingsDataAndValPath
-    //     //     );
-    //     // require(
-    //     //     keccak256(root) == keccak256(_newBlockHeader.blockHash),
-    //     //     "invalid blockHash"
-    //     // );
-
-    //     // ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSet(
-    //     //     height,
-    //     //     _validatorSet
-    //     // );
-    //     // ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateBlockHash(
-    //     //     height,
-    //     //     _newBlockHeader.blockHash
-    //     // );
-    //     // ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateDataHash(
-    //     //     _newBlockHeader.height,
-    //     //     _newBlockHeader.dataHash
-    //     // );
-
-    //     // emit BlockHeaderUpdated(
-    //     //     _newBlockHeader.height,
-    //     //     _newBlockHeader.blockHash,
-    //     //     msg.sender
-    //     // );
-    // }
-
-    function updateblockHeaderV2(
-        ICosmosBlockHeader.Header memory _newBlockHeader,
-        IVerifier.DataAndValsHashProof memory _dataAndValsHashProof,
-        ICosmosValidators.Validator[] memory _validatorSet,
-        IVerifier.SignatureValidatorProof[] memory _signatureValidatorProof
-    ) external whenNotPaused {
-        require(
-            ICosmosValidators(resolve("COSMOS_VALIDATORS")).verifyNewHeader(
-                _newBlockHeader,
-                _validatorSet,
-                _signatureValidatorProof
-            ),
-            "invalid validator signature"
-        );
-
-        uint256 height = _newBlockHeader.height;
-
-        uint8[32] memory blockHash = IProcessString(resolve("PROCESS_STRING"))
-            .convertBytesToUint8Array32(_newBlockHeader.blockHash);
-        uint8[32] memory dataHash = IProcessString(resolve("PROCESS_STRING"))
-            .convertBytesToUint8Array32(_newBlockHeader.dataHash);
-        uint8[32] memory validatorsHash = IProcessString(
-            resolve("PROCESS_STRING")
-        ).convertBytesToUint8Array32(_newBlockHeader.validatorHash);
-
-        require(
-            ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
-                .verifyDataAndValsHash(
-                    _dataAndValsHashProof,
-                    dataHash,
-                    validatorsHash,
-                    blockHash
-                ),
-            "invalid blockHash"
-        );
-
         ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSet(
             height,
-            _validatorSet
+            _validatorHashProof[0].validatorPubKey,
+            _validatorHashProof[1].validatorPubKey
         );
+
         ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateBlockHash(
             height,
             _newBlockHeader.blockHash
