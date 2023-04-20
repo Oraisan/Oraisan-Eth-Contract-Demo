@@ -11,7 +11,8 @@ const main = async () => {
     "PROCESS_STRING",
     "VERIFIER_VALIDATOR_SIGNATURE_111",
     "VERIFIER_VALIDATOR_SIGNATURE_110",
-    "VERIFIER_DATA_AND_VALS",
+    "VERIFIER_VALIDATORS_LEFT",
+    "VERIFIER_VALIDATORS_RIGHT"
   ];
   let setAddress;
   for (let i = 0; i < Contract.length; i++) {

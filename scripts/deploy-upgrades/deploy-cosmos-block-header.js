@@ -4,9 +4,9 @@ require("dotenv").config();
 const input = {
     lib_AddressManager: process.env.Lib_AddressManager,
     height: 10340037,
-    blockHash: "0xDDB010FECDA643EFB6E7F0FBCBB0A4AB7F23173F865B40EDF47139A3627E1200",
-    dataHash: "0x677BF175DE9C1EDDD2F26AE4161631390A24486D44BBC71982C39965F58967C4",
-    validatorHash: "0x1A695B879702E2CBA64500C4717D9A96C951ED2083124F1179B7E7223825EA6D"
+    blockHash: "0x4438338076A598D0B4C589E572342130FC5BCD60",
+    dataHash: "0x5DF6E0E2761359D30A8275058E299FCC03815345",
+    validatorHash: "0x11F6D96C885B3C278D28DBF6892DFC809C4FC399"
 }
 const main = async () => {
     const CosmosBlockHeader = await ethers.getContractFactory("CosmosBlockHeader");

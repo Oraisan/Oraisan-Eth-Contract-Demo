@@ -208,7 +208,7 @@ contract CosmosValidators is
         ICosmosBlockHeader.Header memory _newBlockHeader,
         IVerifier.ValidatorHashRightProof memory _validatorHashRightProof
     ) public view returns (bool) {
-        string memory optionName = "VALIDATORS_RIGHT";
+        string memory optionName = _validatorHashRightProof.optionName;
         uint[2] memory a = _validatorHashRightProof.pi_a;
         uint[2][2] memory b = _validatorHashRightProof.pi_b;
         uint[2] memory c = _validatorHashRightProof.pi_c;
@@ -242,7 +242,7 @@ contract CosmosValidators is
         address _validatorHash,
         IVerifier.ValidatorHashLeftProof memory _validatorHashLeftProof
     ) public view returns (bool) {
-        string memory optionName = "VALIDATORS_LEFT";
+        string memory optionName = _validatorHashLeftProof.optionName;
         uint[2] memory a = _validatorHashLeftProof.pi_a;
         uint[2][2] memory b = _validatorHashLeftProof.pi_b;
         uint[2] memory c = _validatorHashLeftProof.pi_c;
@@ -280,7 +280,7 @@ contract CosmosValidators is
         address _validatorAddress,
         IVerifier.SignatureValidatorProof memory _signatureValidatorProof
     ) public view returns (bool) {
-        string memory optionName = "VALIDATOR_SIGNATURE";
+        string memory optionName = _signatureValidatorProof.optionName;        
         uint[2] memory a = _signatureValidatorProof.pi_a;
         uint[2][2] memory b = _signatureValidatorProof.pi_b;
         uint[2] memory c = _signatureValidatorProof.pi_c;
