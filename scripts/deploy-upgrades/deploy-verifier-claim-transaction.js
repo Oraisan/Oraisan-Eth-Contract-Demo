@@ -1,7 +1,7 @@
-const { deployVerifierValidatorsLeft } = require("./deploy");
+const { deployVerifierClaimTransaction } = require("./deploy");
 
 const main = async () => {
-    await deployVerifierValidatorsLeft();
+    await deployVerifierClaimTransaction();    
 }
 
 main()

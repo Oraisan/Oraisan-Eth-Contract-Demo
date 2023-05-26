@@ -3,8 +3,6 @@ pragma solidity ^0.8.0;
 
 import {IVerifier} from "../interface/IVerifier.sol";
 import {ICosmosValidators} from "../interface/ICosmosValidators.sol";
-import {IProcessString} from "../interface/IProcessString.sol";
-import {IAVL_Tree} from "../interface/IAVL_Tree.sol";
 import "../libs/Lib_AddressResolver.sol";
 
 import "hardhat/console.sol";

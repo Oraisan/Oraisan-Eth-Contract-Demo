@@ -1,7 +1,7 @@
-const { deployVerifierValidatorsLeft } = require("./deploy");
+const { deployVerifierRootDeposit } = require("./deploy");
 
 const main = async () => {
-    await deployVerifierValidatorsLeft();
+    await deployVerifierRootDeposit();
 }
 
 main()

@@ -1,7 +1,7 @@
-const { deployVerifierValidatorsLeft } = require("./deploy");
+const { deployOraisanBridge } = require("./deploy");
 
 const main = async () => {
-    await deployVerifierValidatorsLeft();
+    await deployOraisanBridge()
 }
 
 main()
@@ -10,5 +10,4 @@ main()
         console.error(error);
         process.exit(1);
     });
-
 

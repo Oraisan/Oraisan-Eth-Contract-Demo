@@ -3,6 +3,29 @@ pragma solidity ^0.8.0;
 
 interface IVerifier {
 
+    struct ClaimTransactionProof {
+        string optionName;
+        uint[2] pi_a;
+        uint[2][2] pi_b;
+        uint[2] pi_c;
+        address eth_bridge_address;
+        address eth_receiver;
+        uint256 amount;
+        address cosmos_token_address;
+        uint256 depositRoot;
+    }
+
+    struct DepositRootProof {
+        string optionName;
+        uint[2] pi_a;
+        uint[2][2] pi_b;
+        uint[2] pi_c;
+        address cosmosSender;
+        address cosmosBridge;
+        uint256 depositRoot;
+        address dataHash;
+    }
+
     struct ValidatorHashLeftProof {
         string optionName;
         uint[2] pi_a;

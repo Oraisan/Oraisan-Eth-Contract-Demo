@@ -2,9 +2,7 @@
 pragma solidity ^0.8.0;
 
 import {IVerifier} from "../../interface/IVerifier.sol";
-import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 import {ICosmosValidators} from "../../interface/ICosmosValidators.sol";
-import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 
 import "hardhat/console.sol";
 import "../../libs/Lib_AddressResolver.sol";
@@ -83,7 +81,7 @@ contract CosmosBlockHeader is
         uint256 _height,
         address _dataHash
     ) external {
-        require(msg.sender == resolve("ORAISAN_GATE"), "invalid sender");
+        require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
         require(dataHashAtHeight[_height] == address(0), "datahash is existed");
         // require(keccak256(blockHash) == keccak256(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
         dataHash = _dataHash;
@@ -94,7 +92,7 @@ contract CosmosBlockHeader is
         uint256 _height,
         address _blockHash
     ) external {
-        require(msg.sender == resolve("ORAISAN_GATE"), "invalid sender");
+        require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
         require(
             _height ==
                 ICosmosValidators(resolve("COSMOS_VALIDATORS"))

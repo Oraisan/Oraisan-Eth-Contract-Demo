@@ -1,14 +1,7 @@
-const { ethers, upgrades } = require("hardhat");
-require("dotenv").config();
+const { deployOraisanGate } = require("./deploy");
 
 const main = async () => {
-    const OraisanGate = await ethers.getContractFactory("OraisanGate");
-    const oraisanGate = await upgrades.deployProxy(OraisanGate,
-        [
-            process.env.Lib_AddressManager
-        ]);
-    await oraisanGate.deployed();
-    console.log("OraisanGate dedployed at: ", oraisanGate.address);
+    await deployOraisanGate();
 }
 
 main()

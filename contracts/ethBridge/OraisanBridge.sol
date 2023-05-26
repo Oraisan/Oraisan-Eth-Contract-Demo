@@ -1,0 +1,164 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.0;
+
+import "./MerkleTreeWithHistory.sol";
+
+import {IVerifier} from "../interface/IVerifier.sol";
+import {ICosmosBlockHeader} from "../interface/ICosmosBlockHeader.sol";
+import {ICosmosValidators} from "../interface/ICosmosValidators.sol";
+import {IERC20Token} from "../interface/IERC20Token.sol";
+import "../libs/Lib_AddressResolver.sol";
+
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+contract OraisanBridge is
+    Lib_AddressResolver,
+    MerkleTreeWithHistory,
+    OwnableUpgradeable,
+    PausableUpgradeable,
+    ReentrancyGuardUpgradeable
+{
+    /*╔══════════════════════════════╗
+      ║            EVENTS            ║
+      ╚══════════════════════════════╝*/
+    event UpdateDepositRootCompleted(uint[] indexed inputs, uint256 timestamp);
+    event ClaimTransactionCompleted(uint[] indexed inputs, uint256 timestamp);
+
+    /*╔══════════════════════════════╗
+      ║          CONSTRUCTOR         ║
+      ╚══════════════════════════════╝*/
+
+    // mapping(uint256 => address) public updaterAtHeight;
+    mapping(address => bool) public isSupportCosmosBridge;
+    mapping(address => address) public cosmosToEthTokenAddress;
+    mapping(address => address) public ethToCosmosTokenAddress;
+
+    function initialize(
+        address _libAddressManager,
+        uint32 _merkleTreeHeight,
+        address _cosmosBridge
+    ) public initializer {
+        require(
+            levels == 0 && address(libAddressManager) == address(0),
+            "Bridge is already initialized"
+        );
+
+        isSupportCosmosBridge[_cosmosBridge] = true;
+
+        __Lib_AddressResolver_init(_libAddressManager);
+        __MerkleTreeWithHistory_init(_merkleTreeHeight);
+        __Context_init_unchained();
+        __Ownable_init_unchained();
+        __Pausable_init_unchained();
+        __ReentrancyGuard_init_unchained();
+    }
+
+    /**
+     * Pause relaying.
+     */
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpauseContract() external onlyOwner {
+        _unpause();
+    }
+
+    
+
+    /*  ╔══════════════════════════════╗
+        ║        ADMIN FUNCTIONS       ║
+        ╚══════════════════════════════╝       */
+
+    function registerTokenPair(
+        address _cosmosTokenAddress,
+        address _ethTokenAddress
+    ) external whenNotPaused onlyOwner{
+        require(cosmosToEthTokenAddress[_cosmosTokenAddress] != address(0) || ethToCosmosTokenAddress[_ethTokenAddress] != address(0), "token was registered!");
+        cosmosToEthTokenAddress[_cosmosTokenAddress] = _ethTokenAddress;
+        ethToCosmosTokenAddress[_ethTokenAddress] = _cosmosTokenAddress;
+    }
+
+    function updateRootDepositTree(
+        IVerifier.DepositRootProof memory _depositRootProof
+    ) external whenNotPaused returns (bool) {
+        require(
+            isSupportCosmosBridge[_depositRootProof.cosmosBridge],
+            "Don't support this bridge"
+        );
+
+        require(
+            _depositRootProof.dataHash ==
+                ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER"))
+                    .getCurrentDataHash(),
+            "Data hash is invalid!"
+        );
+
+        string memory optionName = _depositRootProof.optionName;
+        uint[2] memory pi_a = _depositRootProof.pi_a;
+        uint[2][2] memory pi_b = _depositRootProof.pi_b;
+        uint[2] memory pi_c = _depositRootProof.pi_c;
+        uint256[] memory input = new uint256[](4);
+
+        input[0] = uint256(uint160(_depositRootProof.cosmosSender));
+        input[1] = uint256(uint160(_depositRootProof.cosmosBridge));
+        input[2] = _depositRootProof.depositRoot;
+        input[3] = uint256(uint160(_depositRootProof.dataHash));
+
+        require(
+            IVerifier(resolve(optionName)).verifyProof(pi_a, pi_b, pi_c, input),
+            "Invalid depositRoot proof"
+        );
+
+        bool isInsert = _insert(_depositRootProof.depositRoot);
+
+
+        emit UpdateDepositRootCompleted(input, block.timestamp);
+        return isInsert;
+    }
+
+    function claimTransaction(
+        IVerifier.ClaimTransactionProof memory _claimTransactionProof
+    ) external {
+        require(cosmosToEthTokenAddress[_claimTransactionProof.cosmos_token_address] != address(0), "Not support this token");
+        require(_claimTransactionProof.eth_bridge_address == address(this), "This bridge isn't support for clamming token");
+        require(isKnownDepostRoot(_claimTransactionProof.depositRoot), "Deposit root is invalid");
+        string memory optionName = _claimTransactionProof.optionName;
+        uint[2] memory pi_a = _claimTransactionProof.pi_a;
+        uint[2][2] memory pi_b = _claimTransactionProof.pi_b;
+        uint[2] memory pi_c = _claimTransactionProof.pi_c;
+        uint256[] memory input = new uint256[](5);
+
+        input[0] = uint256(uint160(_claimTransactionProof.eth_bridge_address));
+        input[1] = uint256(uint160(_claimTransactionProof.eth_receiver));
+        input[2] = _claimTransactionProof.amount;
+        input[3] = uint256(uint160(_claimTransactionProof.cosmos_token_address));
+        input[4] = _claimTransactionProof.depositRoot;
+
+        require(
+            IVerifier(resolve(optionName)).verifyProof(pi_a, pi_b, pi_c, input),
+            "Invalid depositRoot proof"
+        );
+
+        IERC20Token(cosmosToEthTokenAddress[_claimTransactionProof.cosmos_token_address]).mint(_claimTransactionProof.eth_receiver, _claimTransactionProof.amount);
+        emit ClaimTransactionCompleted(input, block.timestamp);
+    }
+    
+    function _verifyProof(
+        string memory _optionName, //Ex: VERIFIER_AGE
+        uint[2] memory pi_a,
+        uint[2][2] memory pi_b,
+        uint[2] memory pi_c,
+        uint[] memory input
+    ) internal view returns (bool) {
+        return
+            IVerifier(resolve(_optionName)).verifyProof(
+                pi_a,
+                pi_b,
+                pi_c,
+                input
+            );
+    }
+}

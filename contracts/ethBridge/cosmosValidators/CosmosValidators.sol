@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.0;
 
-import {IAVL_Tree} from "../../interface/IAVL_Tree.sol";
 import {IVerifier} from "../../interface/IVerifier.sol";
-import {IProcessString} from "../../interface/IProcessString.sol";
 import {ICosmosBlockHeader} from "../../interface/ICosmosBlockHeader.sol";
 import "../../libs/Lib_AddressResolver.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -79,7 +77,7 @@ contract CosmosValidators is
         address[] memory _validatorLeft,
         address[] memory _validatorRight
     ) external {
-        require(msg.sender == resolve("ORAISAN_GATE"), "invalid sender");
+        require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
         require(
             validatorSetAtHeight[_height].length == 0,
             "validator set was updated at height"
@@ -111,9 +109,6 @@ contract CosmosValidators is
         validatorSetAtHeight[_height] = validatorSet;
         numValidator = lenL + lenR;
     }
-
-    // bridge validator
-    function updateValidatorSetByProof() external {}
 
     /*  ╔══════════════════════════════╗
         ║        VERIFY FUNCTIONS      ║
