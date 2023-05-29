@@ -2,7 +2,7 @@
 exports.getProofValidatorSignature = exports.getProofUpdateRootDeposit = void 0;
 const { ethers } = require("hardhat");
 const fs = require("fs");
-const { genSignature } = require("./signature");
+const {readJsonFile, bigNumberToAddress} = require("../utils/helper")
 require("dotenv").config();
 
 // const abiCoder = ethers.utils.defaultAbiCoder;
@@ -31,8 +31,8 @@ const getProofValidatorSignature =  (pathInput, pathProof) => {
 exports.getProofValidatorSignature = getProofValidatorSignature;
 
 const getProofUpdateRootDeposit = (pathInput, pathProof) => {
-    const inputVerifierValidatorSignatureJson = JSON.parse(fs.readFileSync(pathInput).toString());
-    const proofVerifierValidatorSignatureJson = JSON.parse(fs.readFileSync(pathProof).toString());
+    const inputVerifierValidatorSignatureJson = readJsonFile(pathInput);
+    const proofVerifierValidatorSignatureJson = readJsonFile(pathProof);
     const proofVerifierValidatorSignatureData = {
         a: proofVerifierValidatorSignatureJson.pi_a.slice(0, 2),
         b: proofVerifierValidatorSignatureJson.pi_b.slice(0, 2).map(e => e.reverse()),
@@ -63,12 +63,12 @@ const getProofClaimTransaction = (pathInput, pathProof) => {
     };
 
     const inputProof = {
-        optionName: "VERIFIER_ROOT_DEPOSIT",
+        optionName: "VERIFIER_CLAIM_TRANSACTION",
         pi_a: proofVerifierValidatorSignatureData.a,
         pi_b: proofVerifierValidatorSignatureData.b,
         pi_c: proofVerifierValidatorSignatureData.c,
-        eth_bridge_address: inputVerifierValidatorSignatureJson[0],
-        eth_receiver: inputVerifierValidatorSignatureJson[1],
+        eth_bridge_address: bigNumberToAddress(inputVerifierValidatorSignatureJson[0]),
+        eth_receiver: bigNumberToAddress(inputVerifierValidatorSignatureJson[1]),
         amount: inputVerifierValidatorSignatureJson[2],
         cosmos_token_address: inputVerifierValidatorSignatureJson[3],
         depositRoot: inputVerifierValidatorSignatureJson[4]

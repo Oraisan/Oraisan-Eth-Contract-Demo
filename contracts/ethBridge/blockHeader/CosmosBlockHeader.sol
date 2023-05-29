@@ -17,12 +17,12 @@ contract CosmosBlockHeader is
     ReentrancyGuardUpgradeable
 {
     uint256 internal currentHeight;
-    address internal blockHash;
-    address internal dataHash;
-    address internal validatorHash;
+    uint160 internal blockHash;
+    uint160 internal dataHash;
+    uint160 internal validatorHash;
 
-    mapping(uint256 => address) public dataHashAtHeight;
-    mapping(uint256 => address) public blockHashAtHeight;
+    mapping(uint256 => uint160) public dataHashAtHeight;
+    mapping(uint256 => uint160) public blockHashAtHeight;
 
     // struct DataHashProof {
     //     uint256 leaf;
@@ -40,9 +40,9 @@ contract CosmosBlockHeader is
     function initialize(
         address _libAddressManager,
         uint256 _height,
-        address _blockHash,
-        address _dataHash,
-        address _validatorHash
+        uint160 _blockHash,
+        uint160 _dataHash,
+        uint160 _validatorHash
     ) public initializer {
         require(currentHeight == 0, "CosmosBlockHeader is initialized");
         currentHeight = _height;
@@ -53,7 +53,6 @@ contract CosmosBlockHeader is
         dataHashAtHeight[_height] = _dataHash;
         blockHashAtHeight[_height] = _blockHash;
 
-        // console.log("_libAddressManager :", _libAddressManager);
 
         __Lib_AddressResolver_init(_libAddressManager);
         __Context_init_unchained();
@@ -79,10 +78,10 @@ contract CosmosBlockHeader is
 
     function updateDataHash(
         uint256 _height,
-        address _dataHash
+        uint160 _dataHash
     ) external {
         require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
-        require(dataHashAtHeight[_height] == address(0), "datahash is existed");
+        require(dataHashAtHeight[_height] == 0, "datahash is existed");
         // require(keccak256(blockHash) == keccak256(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
         dataHash = _dataHash;
         dataHashAtHeight[_height] = _dataHash;
@@ -90,7 +89,7 @@ contract CosmosBlockHeader is
 
     function updateBlockHash(
         uint256 _height,
-        address _blockHash
+        uint160 _blockHash
     ) external {
         require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
         require(
@@ -99,7 +98,7 @@ contract CosmosBlockHeader is
                     .getCurrentBlockHeight(),
             "invalid  height header"
         );
-        require(blockHashAtHeight[_height] == address(0), "blockHash is existed");
+        require(blockHashAtHeight[_height] == 0, "blockHash is existed");
         currentHeight = _height;
         blockHash = _blockHash;
         blockHashAtHeight[_height] = blockHash;
@@ -113,21 +112,21 @@ contract CosmosBlockHeader is
         return currentHeight;
     }
 
-    function getCurrentBlockHash() public view returns (address) {
+    function getCurrentBlockHash() public view returns (uint160) {
         return blockHash;
     }
 
     function getBlockHash(
         uint256 _height
-    ) public view returns (address) {
+    ) public view returns (uint160) {
         return blockHashAtHeight[_height];
     }
 
-    function getCurrentDataHash() public view returns (address) {
+    function getCurrentDataHash() public view returns (uint160) {
         return dataHash;
     }
 
-    function getDataHash(uint256 _height) public view returns (address) {
+    function getDataHash(uint256 _height) public view returns (uint160) {
         return dataHashAtHeight[_height];
     }
 }

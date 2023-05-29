@@ -11,7 +11,7 @@ interface IVerifier {
         address eth_bridge_address;
         address eth_receiver;
         uint256 amount;
-        address cosmos_token_address;
+        uint160 cosmos_token_address;
         uint256 depositRoot;
     }
 
@@ -20,10 +20,10 @@ interface IVerifier {
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
-        address cosmosSender;
-        address cosmosBridge;
+        uint160 cosmosSender;
+        uint160 cosmosBridge;
         uint256 depositRoot;
-        address dataHash;
+        uint160 dataHash;
     }
 
     struct ValidatorHashLeftProof {

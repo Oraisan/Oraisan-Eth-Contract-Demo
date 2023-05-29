@@ -5,7 +5,6 @@ import {IVerifier} from "../interface/IVerifier.sol";
 import {ICosmosValidators} from "../interface/ICosmosValidators.sol";
 import "../libs/Lib_AddressResolver.sol";
 
-import "hardhat/console.sol";
 import {ICosmosBlockHeader} from "../interface/ICosmosBlockHeader.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
@@ -24,7 +23,7 @@ contract OraisanGate is
       ╚══════════════════════════════╝*/
     event BlockHeaderUpdated(
         uint256 blockHeight,
-        address blockHash,
+        uint160 blockHash,
         address updater
     );
     /*╔══════════════════════════════╗

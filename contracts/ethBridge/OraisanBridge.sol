@@ -5,7 +5,6 @@ import "./MerkleTreeWithHistory.sol";
 
 import {IVerifier} from "../interface/IVerifier.sol";
 import {ICosmosBlockHeader} from "../interface/ICosmosBlockHeader.sol";
-import {ICosmosValidators} from "../interface/ICosmosValidators.sol";
 import {IERC20Token} from "../interface/IERC20Token.sol";
 import "../libs/Lib_AddressResolver.sol";
 
@@ -31,21 +30,19 @@ contract OraisanBridge is
       ╚══════════════════════════════╝*/
 
     // mapping(uint256 => address) public updaterAtHeight;
-    mapping(address => bool) public isSupportCosmosBridge;
-    mapping(address => address) public cosmosToEthTokenAddress;
-    mapping(address => address) public ethToCosmosTokenAddress;
-
+    mapping(uint160 => bool) public isSupportCosmosBridge;
+    mapping(uint160 => address) public cosmosToEthTokenAddress;
+    mapping(address => uint160) public ethToCosmosTokenAddress;
+    mapping(uint256 => bool) public isClaimed;
+    
     function initialize(
         address _libAddressManager,
-        uint32 _merkleTreeHeight,
-        address _cosmosBridge
+        uint32 _merkleTreeHeight
     ) public initializer {
         require(
             levels == 0 && address(libAddressManager) == address(0),
             "Bridge is already initialized"
         );
-
-        isSupportCosmosBridge[_cosmosBridge] = true;
 
         __Lib_AddressResolver_init(_libAddressManager);
         __MerkleTreeWithHistory_init(_merkleTreeHeight);
@@ -66,19 +63,38 @@ contract OraisanBridge is
         _unpause();
     }
 
-    
-
     /*  ╔══════════════════════════════╗
         ║        ADMIN FUNCTIONS       ║
         ╚══════════════════════════════╝       */
 
+    function registerCosmosBridge(
+        uint160 _cosmosBridge,
+        bool _isSupport
+    ) external whenNotPaused onlyOwner {
+        require(
+            isSupportCosmosBridge[_cosmosBridge] != _isSupport,
+            "cosmos bridge was supported!"
+        );
+        isSupportCosmosBridge[_cosmosBridge] = _isSupport;
+    }
+
     function registerTokenPair(
-        address _cosmosTokenAddress,
+        uint160 _cosmosTokenAddress,
         address _ethTokenAddress
-    ) external whenNotPaused onlyOwner{
-        require(cosmosToEthTokenAddress[_cosmosTokenAddress] != address(0) || ethToCosmosTokenAddress[_ethTokenAddress] != address(0), "token was registered!");
+    ) external whenNotPaused onlyOwner {
+        require(
+            cosmosToEthTokenAddress[_cosmosTokenAddress] == address(0) ||
+                ethToCosmosTokenAddress[_ethTokenAddress] == 0,
+            "token was registered!"
+        );
         cosmosToEthTokenAddress[_cosmosTokenAddress] = _ethTokenAddress;
         ethToCosmosTokenAddress[_ethTokenAddress] = _cosmosTokenAddress;
+    }
+
+    function deleteTokenPair(uint160 _cosmosTokenAddress) external onlyOwner {
+        address _ethToken = cosmosToEthTokenAddress[_cosmosTokenAddress];
+        cosmosToEthTokenAddress[_cosmosTokenAddress] = address(0);
+        ethToCosmosTokenAddress[_ethToken] = 0;
     }
 
     function updateRootDepositTree(
@@ -86,7 +102,7 @@ contract OraisanBridge is
     ) external whenNotPaused returns (bool) {
         require(
             isSupportCosmosBridge[_depositRootProof.cosmosBridge],
-            "Don't support this bridge"
+            "Do not support this bridge"
         );
 
         require(
@@ -102,18 +118,17 @@ contract OraisanBridge is
         uint[2] memory pi_c = _depositRootProof.pi_c;
         uint256[] memory input = new uint256[](4);
 
-        input[0] = uint256(uint160(_depositRootProof.cosmosSender));
-        input[1] = uint256(uint160(_depositRootProof.cosmosBridge));
+        input[0] = uint256(_depositRootProof.cosmosSender);
+        input[1] = uint256(_depositRootProof.cosmosBridge);
         input[2] = _depositRootProof.depositRoot;
-        input[3] = uint256(uint160(_depositRootProof.dataHash));
-
+        input[3] = uint256(_depositRootProof.dataHash);
+        
         require(
             IVerifier(resolve(optionName)).verifyProof(pi_a, pi_b, pi_c, input),
             "Invalid depositRoot proof"
         );
 
         bool isInsert = _insert(_depositRootProof.depositRoot);
-
 
         emit UpdateDepositRootCompleted(input, block.timestamp);
         return isInsert;
@@ -122,9 +137,20 @@ contract OraisanBridge is
     function claimTransaction(
         IVerifier.ClaimTransactionProof memory _claimTransactionProof
     ) external {
-        require(cosmosToEthTokenAddress[_claimTransactionProof.cosmos_token_address] != address(0), "Not support this token");
-        require(_claimTransactionProof.eth_bridge_address == address(this), "This bridge isn't support for clamming token");
-        require(isKnownDepostRoot(_claimTransactionProof.depositRoot), "Deposit root is invalid");
+        require(
+            cosmosToEthTokenAddress[
+                _claimTransactionProof.cosmos_token_address
+            ] != address(0),
+            "Not support this token"
+        );
+        require(
+            _claimTransactionProof.eth_bridge_address == address(this),
+            "This bridge isn't support for clamming token"
+        );
+        require(
+            isKnownDepostRoot(_claimTransactionProof.depositRoot),
+            "Deposit root is invalid"
+        );
         string memory optionName = _claimTransactionProof.optionName;
         uint[2] memory pi_a = _claimTransactionProof.pi_a;
         uint[2][2] memory pi_b = _claimTransactionProof.pi_b;
@@ -134,7 +160,7 @@ contract OraisanBridge is
         input[0] = uint256(uint160(_claimTransactionProof.eth_bridge_address));
         input[1] = uint256(uint160(_claimTransactionProof.eth_receiver));
         input[2] = _claimTransactionProof.amount;
-        input[3] = uint256(uint160(_claimTransactionProof.cosmos_token_address));
+        input[3] = uint256(_claimTransactionProof.cosmos_token_address);
         input[4] = _claimTransactionProof.depositRoot;
 
         require(
@@ -142,10 +168,15 @@ contract OraisanBridge is
             "Invalid depositRoot proof"
         );
 
-        IERC20Token(cosmosToEthTokenAddress[_claimTransactionProof.cosmos_token_address]).mint(_claimTransactionProof.eth_receiver, _claimTransactionProof.amount);
+        IERC20Token(
+            cosmosToEthTokenAddress[_claimTransactionProof.cosmos_token_address]
+        ).mint(
+                _claimTransactionProof.eth_receiver,
+                _claimTransactionProof.amount
+            );
         emit ClaimTransactionCompleted(input, block.timestamp);
     }
-    
+
     function _verifyProof(
         string memory _optionName, //Ex: VERIFIER_AGE
         uint[2] memory pi_a,
@@ -160,5 +191,25 @@ contract OraisanBridge is
                 pi_c,
                 input
             );
+    }
+
+    /*  ╔══════════════════════════════╗
+        ║             GETTER           ║
+        ╚══════════════════════════════╝       */
+
+    function getTokenPairOfCosmosToken(
+        uint160 _cosmosToken
+    ) public view returns (address) {
+        return cosmosToEthTokenAddress[_cosmosToken];
+    }
+
+    function getTokenPairOfEthToken(
+        address _ethToken
+    ) public view returns (uint160) {
+        return ethToCosmosTokenAddress[_ethToken];
+    }
+
+    function getSupportCosmosBridge(uint160 _cosmosBridge) public view returns(bool) {
+        return isSupportCosmosBridge[_cosmosBridge];
     }
 }

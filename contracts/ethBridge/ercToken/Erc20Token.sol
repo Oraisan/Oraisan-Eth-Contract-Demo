@@ -7,7 +7,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/se
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-contract HijikataToken is
+contract ERC20Token is
     ERC20Upgradeable,
     OwnableUpgradeable,
     PausableUpgradeable,
@@ -64,6 +64,10 @@ contract HijikataToken is
     /*╔══════════════════════════════╗
       ║       ADMIN FUNCTIONS        ║
       ╚══════════════════════════════╝*/
+
+    function setBridgeAdmin(address _bridgeAdmin) external onlyOwner {
+        ethBridge = _bridgeAdmin;
+    }
 
     function mint(
         address _to,

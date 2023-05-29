@@ -1,5 +1,5 @@
 
-exports.getAddresFromHexString = exports.hashHexStringWithSHA256 = exports.hexStringToBytes = exports.readJsonFile = exports.byteArrayToHexString = exports.writeToEnvFile = void 0;
+exports.bigNumberToAddress = exports.getAddresFromHexString = exports.hashHexStringWithSHA256 = exports.hexStringToBytes = exports.readJsonFile = exports.byteArrayToHexString = exports.base64ToHex = exports.writeToEnvFile = exports.getAddresFromAsciiString = void 0;
 
 const crypto = require('crypto');
 const fs = require("fs");
@@ -10,6 +10,15 @@ const readJsonFile = (path) => {
     return parsedData;
 }
 exports.readJsonFile = readJsonFile;
+
+const bigNumberToAddress = (input) => {
+    const bigNumber = BigInt(input);
+    if (typeof bigNumber !== 'bigint') {
+      throw new Error("Invalid BigNumber");
+    }
+    return "0x" + bigNumber.toString(16);
+}
+exports.bigNumberToAddress = bigNumberToAddress;
 
 const hexStringToBytes = (hexString) => {
     const bytes = [];
@@ -31,9 +40,16 @@ exports.hashHexStringWithSHA256 = hashHexStringWithSHA256;
 
 const getAddresFromHexString = (hexString) => {
     const hash = hashHexStringWithSHA256(hexString)
-    return "0x" + hash.slice(0, 40).toUpperCase()
+    return "0x" + hash.slice(0, 40)
 }
 exports.getAddresFromHexString = getAddresFromHexString;
+
+const getAddresFromBase64String = (base64String) => {
+    const hexString = base64ToHex(base64String);
+    const hash = hashHexStringWithSHA256(hexString)
+    return "0x" + hash.slice(0, 40)
+}
+exports.getAddresFromBase64String = getAddresFromBase64String;
 
 const byteArrayToHexString = (byteArray) => {
     let hexString = '';
@@ -44,6 +60,39 @@ const byteArrayToHexString = (byteArray) => {
     return hexString;
 }
 exports.byteArrayToHexString = byteArrayToHexString;
+
+const base64ToHex = (str) => {
+    const result = Buffer.from(str, 'base64').toString("hex") ;
+    return result;
+}
+exports.base64ToHex = base64ToHex;
+
+function stringToAsciiBytes(str) {
+    const bytes = new Uint8Array(str.length);
+    for (let i = 0; i < str.length; i++) {
+        bytes[i] = str.charCodeAt(i);
+    }
+    return bytes;
+}
+
+function uint8ArrayToHexString(uint8Array) {
+    let hexString = "";
+    for (let i = 0; i < uint8Array.length; i++) {
+      const hex = uint8Array[i].toString(16).padStart(2, "0");
+      hexString += hex;
+    }
+    return hexString;
+  }
+
+
+
+const getAddresFromAsciiString = (asciiString) => {
+    const hexString = uint8ArrayToHexString(stringToAsciiBytes(asciiString));
+    const hash = hashHexStringWithSHA256(hexString)
+    return "0x" + hash.slice(0, 40)
+}
+exports.getAddresFromAsciiString = getAddresFromAsciiString;
+
 
 const writeToEnvFile = (key, value) => {
     const envFilePath = '.env';
@@ -76,3 +125,5 @@ const writeToEnvFile = (key, value) => {
     }
 }
 exports.writeToEnvFile = writeToEnvFile;
+
+
