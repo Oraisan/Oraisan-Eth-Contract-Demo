@@ -31,47 +31,48 @@ const getProofValidatorSignature =  (pathInput, pathProof) => {
 exports.getProofValidatorSignature = getProofValidatorSignature;
 
 const getProofUpdateRootDeposit = (pathInput, pathProof) => {
-    const inputVerifierValidatorSignatureJson = readJsonFile(pathInput);
-    const proofVerifierValidatorSignatureJson = readJsonFile(pathProof);
-    const proofVerifierValidatorSignatureData = {
-        a: proofVerifierValidatorSignatureJson.pi_a.slice(0, 2),
-        b: proofVerifierValidatorSignatureJson.pi_b.slice(0, 2).map(e => e.reverse()),
-        c: proofVerifierValidatorSignatureJson.pi_c.slice(0, 2)
+    const inputUpdateDepositRootJson = readJsonFile(pathInput);
+    const proofUpdateDepositRootJson = readJsonFile(pathProof);
+    const proofUpdateDepositRootData = {
+        a: proofUpdateDepositRootJson.pi_a.slice(0, 2),
+        b: proofUpdateDepositRootJson.pi_b.slice(0, 2).map(e => e.reverse()),
+        c: proofUpdateDepositRootJson.pi_c.slice(0, 2)
     };
 
     const inputProof = {
         optionName: "VERIFIER_ROOT_DEPOSIT",
-        pi_a: proofVerifierValidatorSignatureData.a,
-        pi_b: proofVerifierValidatorSignatureData.b,
-        pi_c: proofVerifierValidatorSignatureData.c,
-        cosmosSender: inputVerifierValidatorSignatureJson[0],
-        cosmosBridge: inputVerifierValidatorSignatureJson[1],
-        depositRoot: inputVerifierValidatorSignatureJson[2],
-        dataHash: inputVerifierValidatorSignatureJson[3]
+        pi_a: proofUpdateDepositRootData.a,
+        pi_b: proofUpdateDepositRootData.b,
+        pi_c: proofUpdateDepositRootData.c,
+        cosmosSender: inputUpdateDepositRootJson[0],
+        cosmosBridge: inputUpdateDepositRootJson[1],
+        depositRoot: inputUpdateDepositRootJson[2],
+        dataHash: inputUpdateDepositRootJson[3]
     };
     return inputProof;
 }
 exports.getProofUpdateRootDeposit = getProofUpdateRootDeposit;
 
 const getProofClaimTransaction = (pathInput, pathProof) => {
-    const inputVerifierValidatorSignatureJson = JSON.parse(fs.readFileSync(pathInput).toString());
-    const proofVerifierValidatorSignatureJson = JSON.parse(fs.readFileSync(pathProof).toString());
-    const proofVerifierValidatorSignatureData = {
-        a: proofVerifierValidatorSignatureJson.pi_a.slice(0, 2),
-        b: proofVerifierValidatorSignatureJson.pi_b.slice(0, 2).map(e => e.reverse()),
-        c: proofVerifierValidatorSignatureJson.pi_c.slice(0, 2)
+    const inputVerifierClaimTransactionJson = JSON.parse(fs.readFileSync(pathInput).toString());
+    const proofVerifierClaimTransactionJson = JSON.parse(fs.readFileSync(pathProof).toString());
+    const proofVerifierClaimTransactionData = {
+        a: proofVerifierClaimTransactionJson.pi_a.slice(0, 2),
+        b: proofVerifierClaimTransactionJson.pi_b.slice(0, 2).map(e => e.reverse()),
+        c: proofVerifierClaimTransactionJson.pi_c.slice(0, 2)
     };
 
     const inputProof = {
         optionName: "VERIFIER_CLAIM_TRANSACTION",
-        pi_a: proofVerifierValidatorSignatureData.a,
-        pi_b: proofVerifierValidatorSignatureData.b,
-        pi_c: proofVerifierValidatorSignatureData.c,
-        eth_bridge_address: bigNumberToAddress(inputVerifierValidatorSignatureJson[0]),
-        eth_receiver: bigNumberToAddress(inputVerifierValidatorSignatureJson[1]),
-        amount: inputVerifierValidatorSignatureJson[2],
-        cosmos_token_address: inputVerifierValidatorSignatureJson[3],
-        depositRoot: inputVerifierValidatorSignatureJson[4]
+        pi_a: proofVerifierClaimTransactionData.a,
+        pi_b: proofVerifierClaimTransactionData.b,
+        pi_c: proofVerifierClaimTransactionData.c,
+        eth_bridge_address: bigNumberToAddress(inputVerifierClaimTransactionJson[0]),
+        eth_receiver: bigNumberToAddress(inputVerifierClaimTransactionJson[1]),
+        amount: inputVerifierClaimTransactionJson[2],
+        eth_token_address: bigNumberToAddress(inputVerifierClaimTransactionJson[3]),
+        key: inputVerifierClaimTransactionJson[4],
+        depositRoot: inputVerifierClaimTransactionJson[5]
     };
     return inputProof;
 }

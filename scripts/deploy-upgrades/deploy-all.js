@@ -5,9 +5,9 @@ const main = async () => {
     // await deployLib_AddressManager();
     await deployCosmosBlockHeader();
     // await deployCosmosValidator();
-    // await deployOraisanBridge();
+    await deployOraisanBridge();
     // await deployOraisanGate();
-    // await deployVerifierClaimTransaction();
+    await deployVerifierClaimTransaction();
     // await deployVerifierRootDeposit();
     // await deployVerifierValidatorSignature();
     // await deployVerifierValidatorsLeft();

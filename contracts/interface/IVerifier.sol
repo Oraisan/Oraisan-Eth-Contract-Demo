@@ -11,7 +11,8 @@ interface IVerifier {
         address eth_bridge_address;
         address eth_receiver;
         uint256 amount;
-        uint160 cosmos_token_address;
+        address eth_token_address;
+        uint256 key;
         uint256 depositRoot;
     }
 
