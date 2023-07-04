@@ -24,7 +24,7 @@ interface IVerifier {
         address cosmosSender;
         address cosmosBridge;
         uint256 depositRoot;
-        uint160 dataHash;
+        bytes20 dataHash;
     }
 
     struct ValidatorHashLeftProof {
@@ -72,11 +72,11 @@ interface IVerifier {
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
-        uint256 height;
         address validatorAddress;
-        uint160 validatorHash;
-        uint160 dataHash;
-        uint160 blockHash;
+        bytes20 validatorHash;
+        bytes20 dataHash;
+        bytes20 blockHash;
+        uint256 height;
     }
     /// @return r  bool true if proof is valid
     function verifyProof(

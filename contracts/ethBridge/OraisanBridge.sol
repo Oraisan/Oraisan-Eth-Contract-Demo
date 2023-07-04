@@ -122,7 +122,7 @@ contract OraisanBridge is
         input[0] = uint256(uint160(_depositRootProof.cosmosSender));
         input[1] = uint256(uint160(_depositRootProof.cosmosBridge));
         input[2] = _depositRootProof.depositRoot;
-        input[3] = uint256(_depositRootProof.dataHash);
+        input[3] = uint256(uint160(_depositRootProof.dataHash));
 
         require(
             IVerifier(resolve(optionName)).verifyProof(pi_a, pi_b, pi_c, input),

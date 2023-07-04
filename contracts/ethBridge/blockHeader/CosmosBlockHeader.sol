@@ -17,12 +17,12 @@ contract CosmosBlockHeader is
     ReentrancyGuardUpgradeable
 {
     uint256 internal currentHeight;
-    uint160 internal blockHash;
-    uint160 internal dataHash;
-    uint160 internal validatorHash;
+    bytes20 internal blockHash;
+    bytes20 internal dataHash;
+    bytes20 internal validatorHash;
 
-    mapping(uint256 => uint160) public dataHashAtHeight;
-    mapping(uint256 => uint160) public blockHashAtHeight;
+    mapping(uint256 => bytes20) public dataHashAtHeight;
+    mapping(uint256 => bytes20) public blockHashAtHeight;
 
     // struct DataHashProof {
     //     uint256 leaf;
@@ -40,9 +40,9 @@ contract CosmosBlockHeader is
     function initialize(
         address _libAddressManager,
         uint256 _height,
-        uint160 _blockHash,
-        uint160 _dataHash,
-        uint160 _validatorHash
+        bytes20 _blockHash,
+        bytes20 _dataHash,
+        bytes20 _validatorHash
     ) public initializer {
         require(currentHeight == 0, "CosmosBlockHeader is initialized");
         currentHeight = _height;
@@ -78,7 +78,7 @@ contract CosmosBlockHeader is
 
     function updateDataHash(
         uint256 _height,
-        uint160 _dataHash
+        bytes20 _dataHash
     ) external {
         require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
         require(dataHashAtHeight[_height] == 0, "datahash is existed");
@@ -89,7 +89,7 @@ contract CosmosBlockHeader is
 
     function updateBlockHash(
         uint256 _height,
-        uint160 _blockHash
+        bytes20 _blockHash
     ) external {
         require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
         require(
@@ -112,21 +112,21 @@ contract CosmosBlockHeader is
         return currentHeight;
     }
 
-    function getCurrentBlockHash() public view returns (uint160) {
+    function getCurrentBlockHash() public view returns (bytes20) {
         return blockHash;
     }
 
     function getBlockHash(
         uint256 _height
-    ) public view returns (uint160) {
+    ) public view returns (bytes20) {
         return blockHashAtHeight[_height];
     }
 
-    function getCurrentDataHash() public view returns (uint160) {
+    function getCurrentDataHash() public view returns (bytes20) {
         return dataHash;
     }
 
-    function getDataHash(uint256 _height) public view returns (uint160) {
+    function getDataHash(uint256 _height) public view returns (bytes20) {
         return dataHashAtHeight[_height];
     }
 }

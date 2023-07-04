@@ -5,23 +5,23 @@ import "./IVerifier.sol";
 interface ICosmosBlockHeader is IVerifier {
     struct Header {
         uint256 height;
-        uint160 blockHash;
+        bytes20 blockHash;
         uint256 blockTime;
-        uint160 dataHash;
-        uint160 validatorHash;
+        bytes20 dataHash;
+        bytes20 validatorHash;
     }
 
-    function updateDataHash(uint256 height, uint160 dataHash) external;
+    function updateDataHash(uint256 height, bytes20 dataHash) external;
 
-    function updateBlockHash(uint256 height, uint160 blockHash) external;
+    function updateBlockHash(uint256 height, bytes20 blockHash) external;
 
     function getCurrentBlockHeight() external view returns (uint256);
 
-    function getCurrentBlockHash() external view returns (uint160);
+    function getCurrentBlockHash() external view returns (bytes20);
 
-    function getBlockHash(uint256 height) external view returns (uint160);
+    function getBlockHash(uint256 height) external view returns (bytes20);
 
-    function getCurrentDataHash() external view returns (uint160);
+    function getCurrentDataHash() external view returns (bytes20);
 
-    function getDataHash(uint256 height) external view returns (uint160);
+    function getDataHash(uint256 height) external view returns (bytes20);
 }

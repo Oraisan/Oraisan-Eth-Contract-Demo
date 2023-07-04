@@ -14,13 +14,13 @@ const updateBlockHeader = async (pathInput, pathProof) => {
         input.pi_a,
         input.pi_b,
         input.pi_c,
-        input.height,
         input.validatorAddress,
         input.validatorHash,
         input.dataHash,
         input.blockHash,
+        input.height,
     ],
-        { gasLimit: 498e5 }
+        { gasLimit: 2e6 }
         );
     await res.wait();
     return (await (await rdOwnerCosmosBlockHeader()).getCurrentBlockHash());

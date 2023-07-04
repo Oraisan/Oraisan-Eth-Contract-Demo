@@ -30,14 +30,22 @@ module.exports = {
     },
   },
 
-  defaultNetwork: "bscTestnet",
+  defaultNetwork: "ftmTestnet",
   networks: {
     bscTestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       chainId: 97,
       accounts: [`0x${PRIVATE_KEY}`],
       // gas: 5e6,
-      // gasPrice: 1e8,
+      // gasPrice: auto,
+      // gas: 5e6,
+    },
+    ftmTestnet: {
+      url: "https://rpc.ankr.com/fantom_testnet",
+      chainId: 4002,
+      accounts: [`0x${PRIVATE_KEY}`],
+      // gas: 5e6,
+      // gasPrice: auto,
       // gas: 5e6,
     },
     rinkeby: {

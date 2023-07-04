@@ -5,7 +5,7 @@ require("dotenv").config();
 const setLib_AddressManager = async (optionName, address) => {
     const rdOwner = await rdOwnerLib_AddressManager();
     if(await getLib_AddressManager(optionName) !== address) {
-        let setAddress = await rdOwner.setAddress(optionName, address, {gasLimit: BigInt(1e7)});
+        let setAddress = await rdOwner.setAddress(optionName, address, {gasLimit: BigInt(2e6)});
         await setAddress.wait();
     }
     return await getLib_AddressManager(optionName);

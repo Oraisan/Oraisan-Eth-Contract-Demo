@@ -1,17 +1,18 @@
-const { deployCosmosBlockHeader, deployCosmosValidator, deployOraisanBridge, deployLib_AddressManager, deployOraisanGate, deployVerifierClaimTransaction, deployVerifierRootDeposit, deployVerifierValidatorSignature, deployVerifierValidatorsLeft, deployVerifierValidatorsRight } = require("./deploy");
+const { deployCosmosBlockHeader, deployCosmosValidator, deployOraisanBridge, deployLib_AddressManager, deployOraisanGate, deployVerifierClaimTransaction, deployVerifierRootDeposit, deployVerifierValidatorSignature, deployVerifierValidatorsLeft, deployVerifierValidatorsRight, deployVerifierBlockHeader } = require("./deploy");
 
 
 const main = async () => {
     // await deployLib_AddressManager();
-    // await deployCosmosBlockHeader();
-    // await deployCosmosValidator();
-    // await deployOraisanBridge();
-    // await deployOraisanGate();
-    // await deployVerifierClaimTransaction();
-    // await deployVerifierRootDeposit();
-    // await deployVerifierValidatorSignature();
-    // await deployVerifierValidatorsLeft();
-    // await deployVerifierValidatorsRight();
+    await deployCosmosBlockHeader();
+    await deployCosmosValidator();
+    await deployOraisanBridge();
+    await deployOraisanGate();
+    await deployVerifierClaimTransaction();
+    await deployVerifierRootDeposit();
+    await deployVerifierBlockHeader();
+    await deployVerifierValidatorSignature();
+    await deployVerifierValidatorsLeft();
+    await deployVerifierValidatorsRight();
 }
 
 main()

@@ -254,7 +254,7 @@ contract CosmosValidators is
     }
 
     function verifyValidatorHashLeft(
-        uint160 _validatorHash,
+        bytes20 _validatorHash,
         IVerifier.ValidatorHashLeftProof memory _validatorHashLeftProof
     ) public view returns (bool) {
         string memory optionName = _validatorHashLeftProof.optionName;
