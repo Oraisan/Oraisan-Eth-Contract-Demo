@@ -72,7 +72,7 @@ contract CosmosValidators is
     /*  ╔══════════════════════════════╗
         ║        ADMIN FUNCTIONS       ║
         ╚══════════════════════════════╝       */
-    function updateValidatorSet(
+    function updateValidatorSetLR(
         uint256 _height,
         address[] memory _validatorLeft,
         address[] memory _validatorRight
@@ -108,6 +108,26 @@ contract CosmosValidators is
 
         validatorSetAtHeight[_height] = validatorSet;
         numValidator = lenL + lenR;
+    }
+
+    function updateValidatorSetTestnet(
+        uint256 _height,
+        address _validatorSet
+    ) external {
+        require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
+        require(
+            validatorSetAtHeight[_height].length == 0,
+            "validator set was updated at height"
+        );
+
+        currentHeight = _height;
+
+        // validatorSet = new bytes[](len);
+        if(validatorSet[0] != _validatorSet) {
+            delete validatorSet;
+            validatorSet.push(_validatorSet);
+            validatorHeight[_validatorSet] = _height;
+        }
     }
 
     /*  ╔══════════════════════════════╗

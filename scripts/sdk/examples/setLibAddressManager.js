@@ -8,6 +8,7 @@ const main = async () => {
     "ORAISAN_BRIDGE",
     "COSMOS_BLOCK_HEADER",
     // "COSMOS_VALIDATORS",
+    "VERIFIER_BLOCK_HEADER",
     // "VERIFIER_VALIDATOR_SIGNATURE",
     // "VERIFIER_VALIDATORS_LEFT",
     // "VERIFIER_VALIDATORS_RIGHT",
@@ -26,7 +27,7 @@ const main = async () => {
 };
 
 main()
-  .then(() => {})
+  .then(() => { })
   .catch((error) => {
     console.error(error);
     process.exit(1);

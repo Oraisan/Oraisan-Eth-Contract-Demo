@@ -36,7 +36,9 @@ module.exports = {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       chainId: 97,
       accounts: [`0x${PRIVATE_KEY}`],
-      gas: 3e6,
+      // gas: 5e6,
+      // gasPrice: 1e8,
+      // gas: 5e6,
     },
     rinkeby: {
       url: INFURA_URL,

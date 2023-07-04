@@ -4,10 +4,15 @@ import {IVerifier} from "./IVerifier.sol";
 import {ICosmosBlockHeader} from "./ICosmosBlockHeader.sol";
 
 interface ICosmosValidators {
-    function updateValidatorSet(
+    function updateValidatorSetLR(
         uint256 _height,
         address[] memory _validatorLeft,
         address[] memory _validatorRight
+    ) external;
+
+    function updateValidatorSetTestnet(
+        uint256 _height,
+        address _validatorSet
     ) external;
 
     function updateValidatorSetByProof() external;

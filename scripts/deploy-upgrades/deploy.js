@@ -1,5 +1,5 @@
 const { ethers, upgrades } = require("hardhat");
-const { readJsonFile, getAddresFromHexString, writeToEnvFile } = require("../utils/helper");
+const { readJsonFile, getAddresFromHexString, writeToEnvFile, bigNumberToHexString, convertHexStringToAddress } = require("../utils/helper");
 const { setLib_AddressManager } = require("../sdk/libAddressManager");
 require("dotenv").config();
 
@@ -50,7 +50,7 @@ const getCosmosValidatorsConstructor = () => {
 
     const validatorAddresses = [];
     for (i = 0; i < data.commit.signatures.length; i++) {
-        validatorAddresses.push(("0x" + data.commit.signatures[i].validator_address).toString())
+        validatorAddresses.push(convertHexStringToAddress(("0x" + data.commit.signatures[i].validator_address).toString()))
     }
 
     const inputValidators = {
@@ -123,6 +123,16 @@ const deployVerifierRootDeposit = async () => {
     await setLib_AddressManager("VERIFIER_ROOT_DEPOSIT", verifier.address)
 }
 exports.deployVerifierRootDeposit = deployVerifierRootDeposit;
+
+const deployVerifierBlockHeader = async () => {
+    const Verifier = await ethers.getContractFactory("VerifierBlockHeader");
+    const verifier = await upgrades.deployProxy(Verifier, []);
+    await verifier.deployed();
+    console.log("VerifierBlockHeader dedployed at: ", verifier.address);
+    writeToEnvFile("VERIFIER_BLOCK_HEADER", verifier.address)
+    await setLib_AddressManager("VERIFIER_BLOCK_HEADER", verifier.address)
+}
+exports.deployVerifierBlockHeader = deployVerifierBlockHeader;
 
 const deployVerifierValidatorSignature = async () => {
     const Verifier = await ethers.getContractFactory("VerifierValidatorSignature");

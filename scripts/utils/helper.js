@@ -1,8 +1,10 @@
 
-exports.bigNumberToAddress = exports.getAddresFromHexString = exports.hashHexStringWithSHA256 = exports.hexStringToBytes = exports.readJsonFile = exports.byteArrayToHexString = exports.base64ToHex = exports.writeToEnvFile = exports.getAddresFromAsciiString = void 0;
+exports.bigNumberToHexString = exports.getAddresFromHexString = exports.hashHexStringWithSHA256 = exports.hexStringToBytes = exports.readJsonFile = exports.byteArrayToHexString = exports.base64ToHex = exports.writeToEnvFile = exports.getAddresFromAsciiString = void 0;
 
 const crypto = require('crypto');
 const fs = require("fs");
+const { toChecksumAddress } = require('ethereumjs-util');
+
 
 const readJsonFile = (path) => {
     const jsonData = fs.readFileSync(path, 'utf-8');
@@ -11,14 +13,21 @@ const readJsonFile = (path) => {
 }
 exports.readJsonFile = readJsonFile;
 
-const bigNumberToAddress = (input) => {
+const convertHexStringToAddress = (hexString) => {
+    const strippedHex = hexString.replace(/^0x/, '');
+
+    return toChecksumAddress(`0x${strippedHex}`);
+}
+exports.convertHexStringToAddress = convertHexStringToAddress;
+
+const bigNumberToHexString = (input) => {
     const bigNumber = BigInt(input);
     if (typeof bigNumber !== 'bigint') {
       throw new Error("Invalid BigNumber");
     }
     return "0x" + bigNumber.toString(16);
 }
-exports.bigNumberToAddress = bigNumberToAddress;
+exports.bigNumberToHexString = bigNumberToHexString;
 
 const hexStringToBytes = (hexString) => {
     const bytes = [];
@@ -40,7 +49,7 @@ exports.hashHexStringWithSHA256 = hashHexStringWithSHA256;
 
 const getAddresFromHexString = (hexString) => {
     const hash = hashHexStringWithSHA256(hexString)
-    return "0x" + hash.slice(0, 40)
+    return convertHexStringToAddress("0x" + hash.slice(0, 40))
 }
 exports.getAddresFromHexString = getAddresFromHexString;
 
@@ -89,7 +98,8 @@ function uint8ArrayToHexString(uint8Array) {
 const getAddresFromAsciiString = (asciiString) => {
     const hexString = uint8ArrayToHexString(stringToAsciiBytes(asciiString));
     const hash = hashHexStringWithSHA256(hexString)
-    return "0x" + hash.slice(0, 40)
+    const address = convertHexStringToAddress("0x" + hash.slice(0, 40))
+    return address
 }
 exports.getAddresFromAsciiString = getAddresFromAsciiString;
 

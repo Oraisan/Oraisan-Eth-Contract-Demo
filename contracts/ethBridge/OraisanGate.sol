@@ -15,8 +15,6 @@ contract OraisanGate is
     OwnableUpgradeable,
     PausableUpgradeable,
     ReentrancyGuardUpgradeable
-
-
 {
     /*╔══════════════════════════════╗
       ║            EVENTS            ║
@@ -74,7 +72,7 @@ contract OraisanGate is
 
         uint256 height = _newBlockHeader.height;
 
-        ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSet(
+        ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSetLR(
             height,
             _validatorHashLeftProof.validatorAddress,
             _validatorHashRightProof.validatorAddress
@@ -96,7 +94,49 @@ contract OraisanGate is
         );
     }
 
-    
+    function updateblockHeaderTestnet(
+        IVerifier.BlockHeaderTestnetProof memory _blockHeaderProof
+    ) external whenNotPaused {
+        string memory optionName = _blockHeaderProof.optionName;
+        uint[2] memory pi_a = _blockHeaderProof.pi_a;
+        uint[2][2] memory pi_b = _blockHeaderProof.pi_b;
+        uint[2] memory pi_c = _blockHeaderProof.pi_c;
+        uint256[] memory input = new uint256[](4);
+
+        input[0] = uint256(uint160(_blockHeaderProof.validatorAddress));
+        input[1] = uint256(_blockHeaderProof.validatorHash);
+        input[2] = uint256(_blockHeaderProof.dataHash);
+        input[3] = uint256(_blockHeaderProof.blockHash);
+        // input[4] = _blockHeaderProof.height;
+
+        require(
+            IVerifier(resolve(optionName)).verifyProof(pi_a, pi_b, pi_c, input),
+            "Invalid blockheader proof"
+        );
+
+        uint256 height = _blockHeaderProof.height;
+
+        ICosmosValidators(resolve("COSMOS_VALIDATORS")).updateValidatorSetTestnet(
+            height,
+            _blockHeaderProof.validatorAddress
+        );
+
+        ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateBlockHash(
+            height,
+            _blockHeaderProof.blockHash
+        );
+        ICosmosBlockHeader(resolve("COSMOS_BLOCK_HEADER")).updateDataHash(
+            height,
+            _blockHeaderProof.dataHash
+        );
+
+        emit BlockHeaderUpdated(
+            height,
+            _blockHeaderProof.blockHash,
+            msg.sender
+        );
+    }
+
     /*  ╔══════════════════════════════╗
       ║        USERS FUNCTIONS       ║
       ╚══════════════════════════════╝ */

@@ -30,9 +30,9 @@ contract OraisanBridge is
       ╚══════════════════════════════╝*/
 
     // mapping(uint256 => address) public updaterAtHeight;
-    mapping(uint160 => bool) public isSupportCosmosBridge;
-    mapping(uint160 => address) public cosmosToEthTokenAddress;
-    mapping(address => uint160) public ethToCosmosTokenAddress;
+    mapping(address => bool) public isSupportCosmosBridge;
+    mapping(address => address) public cosmosToEthTokenAddress;
+    mapping(address => address) public ethToCosmosTokenAddress;
     mapping(uint256 => bool) public isClaimed;
     mapping(bytes32 => bool) public sentProof;
 
@@ -69,7 +69,7 @@ contract OraisanBridge is
         ╚══════════════════════════════╝       */
 
     function registerCosmosBridge(
-        uint160 _cosmosBridge,
+        address _cosmosBridge,
         bool _isSupport
     ) external whenNotPaused onlyOwner {
         require(
@@ -80,22 +80,22 @@ contract OraisanBridge is
     }
 
     function registerTokenPair(
-        uint160 _cosmosTokenAddress,
+        address _cosmosTokenAddress,
         address _ethTokenAddress
     ) external whenNotPaused onlyOwner {
         require(
             cosmosToEthTokenAddress[_cosmosTokenAddress] == address(0) ||
-                ethToCosmosTokenAddress[_ethTokenAddress] == 0,
+                ethToCosmosTokenAddress[_ethTokenAddress] == address(0),
             "token was registered!"
         );
         cosmosToEthTokenAddress[_cosmosTokenAddress] = _ethTokenAddress;
         ethToCosmosTokenAddress[_ethTokenAddress] = _cosmosTokenAddress;
     }
 
-    function deleteTokenPair(uint160 _cosmosTokenAddress) external onlyOwner {
+    function deleteTokenPair(address _cosmosTokenAddress) external onlyOwner {
         address _ethToken = cosmosToEthTokenAddress[_cosmosTokenAddress];
         cosmosToEthTokenAddress[_cosmosTokenAddress] = address(0);
-        ethToCosmosTokenAddress[_ethToken] = 0;
+        ethToCosmosTokenAddress[_ethToken] = address(0);
     }
 
     function updateRootDepositTree(
@@ -119,8 +119,8 @@ contract OraisanBridge is
         uint[2] memory pi_c = _depositRootProof.pi_c;
         uint256[] memory input = new uint256[](4);
 
-        input[0] = uint256(_depositRootProof.cosmosSender);
-        input[1] = uint256(_depositRootProof.cosmosBridge);
+        input[0] = uint256(uint160(_depositRootProof.cosmosSender));
+        input[1] = uint256(uint160(_depositRootProof.cosmosBridge));
         input[2] = _depositRootProof.depositRoot;
         input[3] = uint256(_depositRootProof.dataHash);
 
@@ -140,7 +140,7 @@ contract OraisanBridge is
     ) external {
         require(
             ethToCosmosTokenAddress[_claimTransactionProof.eth_token_address] !=
-                0,
+                address(0),
             "Not support this token"
         );
         require(
@@ -198,7 +198,7 @@ contract OraisanBridge is
         uint256 amount,
         address eth_token_address,
         uint256 key
-    ) public returns (bytes memory) {
+    ) public pure returns (bytes memory) {
         return
             abi.encodePacked(
                 eth_bridge_address,
@@ -230,19 +230,19 @@ contract OraisanBridge is
         ╚══════════════════════════════╝       */
 
     function getTokenPairOfCosmosToken(
-        uint160 _cosmosToken
+        address _cosmosToken
     ) public view returns (address) {
         return cosmosToEthTokenAddress[_cosmosToken];
     }
 
     function getTokenPairOfEthToken(
         address _ethToken
-    ) public view returns (uint160) {
+    ) public view returns (address) {
         return ethToCosmosTokenAddress[_ethToken];
     }
 
     function getSupportCosmosBridge(
-        uint160 _cosmosBridge
+        address _cosmosBridge
     ) public view returns (bool) {
         return isSupportCosmosBridge[_cosmosBridge];
     }

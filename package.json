@@ -25,6 +25,7 @@
     "debug": "~2.6.9",
     "dotenv": "^16.0.3",
     "ethereum-public-key-to-address": "^0.0.5",
+    "ethereumjs-util": "^7.1.5",
     "express": "~4.16.1",
     "fs": "^0.0.1-security",
     "google-protobuf": "^3.21.2",

@@ -21,8 +21,8 @@ interface IVerifier {
         uint[2] pi_a;
         uint[2][2] pi_b;
         uint[2] pi_c;
-        uint160 cosmosSender;
-        uint160 cosmosBridge;
+        address cosmosSender;
+        address cosmosBridge;
         uint256 depositRoot;
         uint160 dataHash;
     }
@@ -67,6 +67,17 @@ interface IVerifier {
         uint256 index;
     }
 
+    struct BlockHeaderTestnetProof {
+        string optionName;
+        uint[2] pi_a;
+        uint[2][2] pi_b;
+        uint[2] pi_c;
+        uint256 height;
+        address validatorAddress;
+        uint160 validatorHash;
+        uint160 dataHash;
+        uint160 blockHash;
+    }
     /// @return r  bool true if proof is valid
     function verifyProof(
         uint[2] memory a,

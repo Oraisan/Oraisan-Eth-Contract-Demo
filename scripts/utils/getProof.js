@@ -2,13 +2,38 @@
 exports.getProofValidatorSignature = exports.getProofUpdateRootDeposit = void 0;
 const { ethers } = require("hardhat");
 const fs = require("fs");
-const {readJsonFile, bigNumberToAddress} = require("../utils/helper")
+const {readJsonFile, convertHexStringToAddress, bigNumberToHexString} = require("../utils/helper")
 require("dotenv").config();
 
 // const abiCoder = ethers.utils.defaultAbiCoder;
 function numToHex(num) {
     return ethers.utils.hexZeroPad(ethers.BigNumber.from(num).toHexString(), 32);
 }
+
+const getProofBlockHeader =  (pathInput, pathProof) => {
+    const inputVerifierBlockHeaderJson = JSON.parse(fs.readFileSync(pathInput).toString());
+    const proofVerifierBlockHeaderJson = JSON.parse(fs.readFileSync(pathProof).toString());
+    const proofVerifierBlockHeaderData = {
+        a: proofVerifierBlockHeaderJson.pi_a.slice(0, 2),
+        b: proofVerifierBlockHeaderJson.pi_b.slice(0, 2).map(e => e.reverse()),
+        c: proofVerifierBlockHeaderJson.pi_c.slice(0, 2)
+    };
+    console.log(inputVerifierBlockHeaderJson)
+    const inputProof = {
+        optionName: "VERIFIER_BLOCK_HEADER",
+        pi_a: proofVerifierBlockHeaderData.a,
+        pi_b: proofVerifierBlockHeaderData.b,
+        pi_c: proofVerifierBlockHeaderData.c,
+        validatorAddress: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[0]))),
+        validatorHash: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[1]))),
+        dataHash: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[2]))),
+        blockHash: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[3]))),
+        height: inputVerifierBlockHeaderJson[4],
+    };
+    console.log(inputProof)
+    return inputProof;
+}
+exports.getProofBlockHeader = getProofBlockHeader;
 
 const getProofValidatorSignature =  (pathInput, pathProof) => {
     const inputVerifierValidatorSignatureJson = JSON.parse(fs.readFileSync(pathInput).toString());
@@ -44,10 +69,10 @@ const getProofUpdateRootDeposit = (pathInput, pathProof) => {
         pi_a: proofUpdateDepositRootData.a,
         pi_b: proofUpdateDepositRootData.b,
         pi_c: proofUpdateDepositRootData.c,
-        cosmosSender: inputUpdateDepositRootJson[0],
-        cosmosBridge: inputUpdateDepositRootJson[1],
+        cosmosSender: convertHexStringToAddress(bigNumberToHexString(inputUpdateDepositRootJson[0])),
+        cosmosBridge: convertHexStringToAddress(bigNumberToHexString(inputUpdateDepositRootJson[1])),
         depositRoot: inputUpdateDepositRootJson[2],
-        dataHash: inputUpdateDepositRootJson[3]
+        dataHash: convertHexStringToAddress(bigNumberToHexString(inputUpdateDepositRootJson[3]))
     };
     return inputProof;
 }
@@ -67,10 +92,10 @@ const getProofClaimTransaction = (pathInput, pathProof) => {
         pi_a: proofVerifierClaimTransactionData.a,
         pi_b: proofVerifierClaimTransactionData.b,
         pi_c: proofVerifierClaimTransactionData.c,
-        eth_bridge_address: bigNumberToAddress(inputVerifierClaimTransactionJson[0]),
-        eth_receiver: bigNumberToAddress(inputVerifierClaimTransactionJson[1]),
+        eth_bridge_address: convertHexStringToAddress(bigNumberToHexString(inputVerifierClaimTransactionJson[0])),
+        eth_receiver: convertHexStringToAddress(bigNumberToHexString(inputVerifierClaimTransactionJson[1])),
         amount: inputVerifierClaimTransactionJson[2],
-        eth_token_address: bigNumberToAddress(inputVerifierClaimTransactionJson[3]),
+        eth_token_address: convertHexStringToAddress(bigNumberToHexString(inputVerifierClaimTransactionJson[3])),
         key: inputVerifierClaimTransactionJson[4],
         depositRoot: inputVerifierClaimTransactionJson[5]
     };
