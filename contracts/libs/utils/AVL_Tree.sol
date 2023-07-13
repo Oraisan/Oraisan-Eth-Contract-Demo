@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./Lib_TMHash.sol";
-import "hardhat/console.sol";
 
 contract AVL_Tree is Initializable {
     struct ProofPath {

@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import {IVerifier} from "../../interface/IVerifier.sol";
 import {ICosmosValidators} from "../../interface/ICosmosValidators.sol";
 
-import "hardhat/console.sol";
 import "../../libs/Lib_AddressResolver.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
@@ -53,7 +52,6 @@ contract CosmosBlockHeader is
         dataHashAtHeight[_height] = _dataHash;
         blockHashAtHeight[_height] = _blockHash;
 
-
         __Lib_AddressResolver_init(_libAddressManager);
         __Context_init_unchained();
         __Ownable_init_unchained();
@@ -76,22 +74,22 @@ contract CosmosBlockHeader is
         ║        ADMIN FUNCTIONS       ║
         ╚══════════════════════════════╝       */
 
-    function updateDataHash(
-        uint256 _height,
-        bytes20 _dataHash
-    ) external {
-        require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
+    function updateDataHash(uint256 _height, bytes20 _dataHash) external {
+        require(
+            msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(),
+            "invalid sender"
+        );
         require(dataHashAtHeight[_height] == 0, "datahash is existed");
         // require(keccak256(blockHash) == keccak256(calulateLRootBySiblings(_dataHash, _siblings)), "invalid datahash");
         dataHash = _dataHash;
         dataHashAtHeight[_height] = _dataHash;
     }
 
-    function updateBlockHash(
-        uint256 _height,
-        bytes20 _blockHash
-    ) external {
-        require(msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(), "invalid sender");
+    function updateBlockHash(uint256 _height, bytes20 _blockHash) external {
+        require(
+            msg.sender == resolve("ORAISAN_GATE") || msg.sender == owner(),
+            "invalid sender"
+        );
         require(
             _height ==
                 ICosmosValidators(resolve("COSMOS_VALIDATORS"))
@@ -116,9 +114,7 @@ contract CosmosBlockHeader is
         return blockHash;
     }
 
-    function getBlockHash(
-        uint256 _height
-    ) public view returns (bytes20) {
+    function getBlockHash(uint256 _height) public view returns (bytes20) {
         return blockHashAtHeight[_height];
     }
 
