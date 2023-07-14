@@ -25,9 +25,9 @@ const getProofBlockHeader =  (pathInput, pathProof) => {
         pi_b: proofVerifierBlockHeaderData.b,
         pi_c: proofVerifierBlockHeaderData.c,
         validatorAddress: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[0]))),
-        validatorHash: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[1]))),
-        dataHash: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[2]))),
-        blockHash: convertHexStringToAddress(bigNumberToHexString((inputVerifierBlockHeaderJson[3]))),
+        validatorHash: bigNumberToHexString((inputVerifierBlockHeaderJson[1])),
+        dataHash: bigNumberToHexString((inputVerifierBlockHeaderJson[2])),
+        blockHash: bigNumberToHexString((inputVerifierBlockHeaderJson[3])),
         height: inputVerifierBlockHeaderJson[4],
     };
     console.log(inputProof)

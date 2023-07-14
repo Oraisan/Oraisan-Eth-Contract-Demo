@@ -2,11 +2,11 @@ const { deployCosmosBlockHeader, deployCosmosValidator, deployOraisanBridge, dep
 
 
 const main = async () => {
-    // await deployLib_AddressManager();
-    // await deployCosmosBlockHeader();
-    // await deployCosmosValidator();
+    await deployLib_AddressManager();
+    await deployCosmosBlockHeader();
+    await deployCosmosValidator();
     await deployOraisanBridge();
-    // await deployOraisanGate();
+    await deployOraisanGate();
     await deployVerifierClaimTransaction();
     await deployVerifierRootDeposit();
     await deployVerifierBlockHeader();
