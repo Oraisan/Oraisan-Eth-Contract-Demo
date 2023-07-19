@@ -72,7 +72,7 @@ const getProofUpdateRootDeposit = (pathInput, pathProof) => {
         cosmosSender: convertHexStringToAddress(bigNumberToHexString(inputUpdateDepositRootJson[0])),
         cosmosBridge: convertHexStringToAddress(bigNumberToHexString(inputUpdateDepositRootJson[1])),
         depositRoot: inputUpdateDepositRootJson[2],
-        dataHash: convertHexStringToAddress(bigNumberToHexString(inputUpdateDepositRootJson[3]))
+        dataHash: bigNumberToHexString(inputUpdateDepositRootJson[3])
     };
     return inputProof;
 }

@@ -11,6 +11,7 @@ import "../libs/Lib_AddressResolver.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "hardhat/console.sol";
 
 contract OraisanBridge is
     Lib_AddressResolver,
@@ -124,6 +125,9 @@ contract OraisanBridge is
         input[2] = _depositRootProof.depositRoot;
         input[3] = uint256(uint160(_depositRootProof.dataHash));
 
+        for(uint256 i = 0; i < 4; i++) {
+            console.log("input ", input[i]);
+        }
         require(
             IVerifier(resolve(optionName)).verifyProof(pi_a, pi_b, pi_c, input),
             "Invalid depositRoot proof"

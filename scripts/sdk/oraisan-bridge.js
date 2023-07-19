@@ -32,7 +32,7 @@ exports.deleteTokenPair = deleteTokenPair;
 
 const updateRootDepositTree = async (pathInput, pathProof) => {
     const input = getProofUpdateRootDeposit(pathInput, pathProof);
-    // console.log(input)
+    console.log(input)
     const rdOwner = await rdOwnerOraisanBridge();
 
     const res = await rdOwner.updateRootDepositTree([
@@ -44,7 +44,7 @@ const updateRootDepositTree = async (pathInput, pathProof) => {
         input.cosmosBridge,
         input.depositRoot,
         input.dataHash
-    ]);
+    ], {gasLimit: 2e6});
     await res.wait();
     return (await rdOwner.getLastDepositRoot());
 }
@@ -62,9 +62,10 @@ const claimTransaction = async (pathInput, pathProof) => {
         input.eth_bridge_address,
         input.eth_receiver,
         input.amount,
-        input.cosmos_token_address,
+        input.eth_token_address,
+        input.key,
         input.depositRoot
-    ]);
+    ], {gasLimit: 2e6});
     await res.wait();
 }
 exports.claimTransaction = claimTransaction;

@@ -41,6 +41,7 @@ const deployCosmosBlockHeader = async () => {
         ]);
     await cosmosBlockHeader.deployed();
     console.log("CosmosBlockHeader dedployed at: ", cosmosBlockHeader.address);
+    await setLib_AddressManager("COSMOS_BLOCK_HEADER", cosmosBlockHeader.address)
     writeToEnvFile("COSMOS_BLOCK_HEADER", cosmosBlockHeader.address)
 }
 exports.deployCosmosBlockHeader = deployCosmosBlockHeader;
