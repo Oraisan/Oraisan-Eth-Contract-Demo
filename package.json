@@ -8,6 +8,7 @@
   "dependencies": {
     "@ethersproject/abstract-provider": "^5.7.0",
     "@ethersproject/abstract-signer": "^5.7.0",
+    "@ethersproject/bytes": "^5.7.0",
     "@ethersproject/transactions": "^5.7.0",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-ethers": "^2.2.3",
@@ -15,6 +16,7 @@
     "@openzeppelin/contracts": "^4.8.3",
     "@openzeppelin/contracts-upgradeable": "^4.8.3",
     "@openzeppelin/hardhat-upgrades": "^1.22.1",
+    "@truffle/hdwallet-provider": "^2.1.13",
     "big-number": "^2.0.0",
     "body-parser": "^1.20.2",
     "circomlibjs": "^0.1.7",

@@ -1,11 +1,12 @@
-const {updateRootDepositTree, claimTransaction} = require("../oraisan-bridge")
+const {claimTransaction} = require("../oraisan-bridge")
+const {getTokenBalance} = require("../eth-token")
 
 require("dotenv").config();
 
 const main = async () => {
   
-   let res = await claimTransaction("./resources/verifyClaimTransaction/public.json", "./resources/verifyClaimTransaction/proof.json");
-   console.log("verifyClaimTransaction", res);
+   await claimTransaction("./resources/verifyClaimTransaction/public.json", "./resources/verifyClaimTransaction/proof.json");
+   console.log("tokenBalance", await getTokenBalance(process.env.PUBLIC_KEY));
 };
 
 main()
