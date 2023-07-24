@@ -1,7 +1,28 @@
-exports.registerCosmosBridge = exports.registerTokenPair = exports.updateRootDepositTree = exports.claimTransaction = void 0;
+exports.isSentProof = exports.registerCosmosBridge = exports.registerTokenPair = exports.updateRootDepositTree = exports.claimTransaction = void 0;
 const { rdOwnerOraisanBridge } = require("./rdOwner");
 const { getProofUpdateRootDeposit, getProofClaimTransaction } = require("../utils/getProof");
 require("dotenv").config();
+
+const isSentProof = async (
+    eth_bridge_address,
+    eth_receiver,
+    amount,
+    eth_token_address,
+    key
+) => {
+    const rdOwner = await rdOwnerOraisanBridge();
+    const msg = await rdOwner.encodeProof(
+        eth_bridge_address,
+        eth_receiver,
+        amount,
+        eth_token_address,
+        key
+    );
+    const hash = ethers.utils.keccak256(msg);
+    console.log("hash", hash)
+    return await rdOwner.sentProof(hash);
+}
+exports.isSentProof = isSentProof;
 
 const registerCosmosBridge = async (_cosmosTokenAddress, _ethTokenAddress) => {
     const rdOwner = await rdOwnerOraisanBridge();
@@ -44,7 +65,7 @@ const updateRootDepositTree = async (pathInput, pathProof) => {
         input.cosmosBridge,
         input.depositRoot,
         input.dataHash
-    ], {gasLimit: 2e6});
+    ], { gasLimit: 2e6 });
     await res.wait();
     return (await rdOwner.getLastDepositRoot());
 }
@@ -65,7 +86,7 @@ const claimTransaction = async (pathInput, pathProof) => {
         input.eth_token_address,
         input.key,
         input.depositRoot
-    ], {gasLimit: 2e6});
+    ], { gasLimit: 2e6 });
     await res.wait();
 }
 exports.claimTransaction = claimTransaction;
