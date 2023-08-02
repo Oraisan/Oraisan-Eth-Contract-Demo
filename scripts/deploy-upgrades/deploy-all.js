@@ -7,12 +7,12 @@ const main = async () => {
     await deployCosmosValidator();
     await deployOraisanBridge();
     await deployOraisanGate();
-    await deployVerifierClaimTransaction();
-    await deployVerifierRootDeposit();
-    await deployVerifierBlockHeader();
-    await deployVerifierValidatorSignature();
-    await deployVerifierValidatorsLeft();
-    await deployVerifierValidatorsRight();
+    // await deployVerifierClaimTransaction();
+    // await deployVerifierRootDeposit();
+    // await deployVerifierBlockHeader();
+    // await deployVerifierValidatorSignature();
+    // await deployVerifierValidatorsLeft();
+    // await deployVerifierValidatorsRight();
 }
 
 main()
